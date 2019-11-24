@@ -1,0 +1,206 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Continuous-time Markov Chains
+
+
+Say {X(t), t≥0} is a continuous-time stochastic process taking values on
+the nonnegative integers. Then X(t) is a Markov chain if for all s,t≥0,
+and nonnegative integers i,j, x(u), 0≤u&lt;s we have  
+![](graphs/mark215.png)
+
+Say the process enters state i at time 0. Let T~i~ be the time
+the process stays in state i. Then  
+![](graphs/mark212.png)  
+But this means that T~i~ is *memoryless*! Of course
+T~i~ is also non-negative and continuous, and therefore
+T~i~ has to have an exponential distribution.
+
+  
+With this we have the following characterization of a continuous-time
+Markov chain:  
+  
+1) the amount of time spent in state i is an exponential distribution
+with mean v~i~.  
+2) when the process leaves state i it next enters state j with some
+probability, say P~ij~.
+
+So a continuous-time Markov chain is a process that moves from state to
+state in accordance with a discrete-space Markov chain, but also spends
+an exponentially distributed amount of time in each state.
+
+#### **Example** 
+
+say {N(t);t≥0} is a Poisson process rate λ. Then {N(t);t≥0}
+is also a continuous-time Markov process which stays at i for an
+exponential time, then jumps to i+1.
+
+`r hl()$hr()`
+
+Let's start by considering a finite state space continuous-time Markov
+chain, that is X(t)$\in$ {0,..,N}, say. Let
+
+P~ij~(t) = P(X(t)=j|X(0)=i)
+
+Then the the Markov property asserts that {X(t),t≥0} satisfies  
+![](graphs/mark21.png)  
+where c) follows from the Chapman-Kolmogorov equations. d\*) is not
+strictly a consequence of the Markov property but is usually a sensible
+additional condition.
+
+Let P(t)=(p~ij~) denote the matrix of transition probabilities
+at time t, so P is a matrix whose entries are functions of t.  
+Now c) can be written as P(s+t)=P(s)P(t), t,s≥0. and d\*) as
+lim~h→0~P(h)=I  
+  
+d) means that P(t) is (right)-continuous at time 0, meaning each entry
+is continuous at t=0. Now  
+![](graphs/mark22.png)  
+and so P(t) is continuous for all t≥0. Actually, we have even more:  
+![](graphs/mark23.png)  
+which shows that P(t) is even differentiable
+
+The rates q~i~ and q~ij~ give as a second way to
+describe a Markov chain, called the infinitesimal description  
+![](graphs/mark24.png)  
+Let  
+![](graphs/mark25.png)
+
+**Remark**
+
+This way of describing a Markov process is more important than it might appear at first for two reasons:
+
+-  it is often much easier to say what happens in a process during a very short period of time than to find the transition matrix.
+
+-  This approach to Markov processes lends itself to generalizing the idea of a Markov process to more complicated state spaces via so called *operator semigroups*. These are transformations on complicated, even infinite dimensional spaces that act very much like matrix multiplication.   
+
+
+#### **Example** 
+
+say {N(t);t≥0} is a Poisson process rate λ. Then
+A~i,i~=-λ and A~i,i+1~=λ
+
+#### **Example** (Two-state Chain)  
+say {X(t),t≥0} is a Markov chain with X(t)$\in$ {0,1}
+and  
+![](graphs/mark26.png)  
+We need A^n^, so  
+![](graphs/mark27.png)
+
+it is easy to find the stationary distribution of a continuous-time
+discrete-space Markov chain in terms of the infinitesimal matrix (if it exists). If all
+states communicate, that is if P~ij~(t)&gt;0 for all i,j and
+some t&gt;0, then lim~t→∞~P~ij~(t) =π~j~&gt;0
+exists, and  
+  
+![](graphs/mark28.png)  
+otherwise the chain would never leave i, and so we have πA=0 or
+
+π~j~q~j~=∑~i≠j~π~i~q~ij~,
+.. j=0,..,N
+
+#### **Example** 
+
+say {N(t);t≥0} is a Poisson process rate λ. Then
+A~i,i~=-λ and A~i,i+1~=λ
+
+Here we have $\pi A=0$ leads to $-\pi_i \lambda +\pi_{i+1}\lambda=0$ or $\pi_i=\pi_0$ for all i, but then $\sum \pi_i=\infty$, so a stationary distribution does not exist. This is obvious because $N(t)\rightarrow \infty$.
+
+#### **Example** Redundancy  
+A company has a computer for its website. If the computer is down they
+can't sell anything, so they have a backup, which takes over if the
+first computer is down. The operating computer fails after an
+exponentially distributed time (with rate μ). Repair times are also
+exponentially distributed (with rate λ). Let's assume that μ is fixed
+but we have a choice of λ (by hiring more technicians). We want to make
+sure that in the long run at most 1% of the time both computers are
+down. How should we choose λ?  
+  
+Let X(t) be the number of computers in operating condition at time t, so
+X(t)$\in$ {0,1,2}. Then X(t) is a Markov chain with
+infinitesimal matrix  
+![](graphs/mark29.png)  
+What is the average "total downtime", that is the time when neither
+computer is working? The system of equations for the stationary
+distribution is  
+![](graphs/mark210.png)  
+and we see that the probability only depends on the ratio λ/μ. Set
+x=λ/μ, then  
+![](graphs/mark211.png)
+
+### Continuous-time Markov Chains with Infinite Statespace
+
+
+#### **Example** (Pure Birth process)
+
+Many webpages have a counter that keeps track of the number of people
+who have visited the site. We can model such a counter as a Markov Chain
+called a "Pure Birth" process. At time 0 there have been 0 visitors. Say
+at time t there have been X(t)=n. The counter stays at n for time T that
+has an exponential distribution with rate λ.
+
+Of course this also a Poisson process.
+
+#### **Example** (Birth and Death Processes)  
+  
+Consider a system whose state at any time is the number of "people" in
+the system. Suppose if there are n people in the system then  
+  
+(i) new arrivals enter the system at an exponential rate λ~n~
+("births") and  
+(ii) people leave the system at and exponential rate μ~n~
+("deaths")  
+(ii) births and deaths occur independently of each other
+
+Thus a birth and death process is a Markov chain with state-space
+{0,1,..} and  
+  
+1) v~0~ = λ~0~  
+2) v~i~ = λ~i~ + μ~i~  
+3) P~01~ = 1  
+4) P~i,i+1~ = λ~i~/(λ~i~ + μ~i~)  
+5) P~i,i-1~ = μ~i~/(λ~i~ + μ~i~)
+
+where 4) is because we go from i to i+1 if there is a birth before a
+death.
+
+Let X~Exp(λ), Y~Exp(μ) and X$\perp$Y. Now  
+![](graphs/mark117.png)
+
+#### **Example** (A simple epidemic model)
+
+Consider a population of m individuals that at time 0 consists of 1
+"infected" and m-1 "susceptible" (individuals that might get infected,
+maybe because they have not been immunized. Once infected an individual
+remains so forever and we suppose that in any time interval h any given
+infected person will cause, with probability αh+o(h) any given
+susceptible to become infected. If we let X(t) denote the number of
+infected people in the population at time t, {X(t),t≥0} is a pure birth
+process with
+
+λ~n~=(m-n)nα, n=1,..,m-1
+
+because if there are n infected people the m-n uninfected ones get
+infected at a rate of nα
+
+Let T~i~ be the time to go from i to i+1 infected, and let T be
+the time until the total population is infected, then  
+![](graphs/mark125.png)

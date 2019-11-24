@@ -1,0 +1,347 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Stochastic Differential Equations
+
+
+#### **Example**
+
+Let's consider the following simple growth model: if there
+are N individuals at time t a certain percentage of them have offspring,
+so at the next time period the number of individuals will be
+
+N(t+1) = a(t)N(t)
+
+if we allow for a continuous change in the population we get the
+differential equation
+
+dN/dt = a(t)N(t)
+
+Now in real live this will never be exact, there will always be some
+randomness in the number of offspring, so a more realistic model would
+be
+
+dN/dt = (a(t)+noise)N(t)
+
+and of course "noise" is a random variable, so now we have a *stochastic
+differential equation.*
+
+
+In order to be more precise we need to go back to Calculus for bit.
+There integrals are usually defined via approximating sums called
+Riemann sums:
+
+![](graphs/sde1.png)
+
+where a=x~1~&lt;..&lt;x~n~=b and
+x~k~≤x~k~^\*^≤x~k+1~
+
+Another way of making sense of this definition is as follows: let's
+consider a function f and say we want to find the integral above. That
+is we want to find the area under the curve f(x). One way to this (for
+example numerically) is to approximate f by a step function  
+![](graphs/sde2.png)
+
+We will return to this idea in a bit, but first we need to study an
+extension of the Riemann integral called the *Riemann-Stiltjies
+integral*, defined as follows:  
+![](graphs/sde4.png)
+
+Here f is a function as before, and g is a function for which we have
+some restrictions. The most common one is to require g to be a function
+of *bounded variation*. For a discussion of this concept see
+[http://en.wikipedia.org/wiki/Bounded_variation](http://en.wikipedia.org/wiki/Bounded_variation), for our purpose the
+following is enough:
+
+**Lemma** 
+
+say g=f-h where both f and h are monotone functions, then g is
+of bounded variation
+
+First of it is obvious that the Riemann-Stiltjies integral is a
+generalization of the Riemann integral, just take g(x)=x. Moreover we
+have
+
+**Lemma:** 
+
+say g has a derivative, then
+
+![](graphs/sde3.png)
+
+As with Riemann integration we have some formulas to help carry out the
+work. Especially nice is
+
+**Theorem** (Integration by parts)
+
+![](graphs/sde5.png)
+
+One reason Riemann-Stiltjies integrals are useful in Probability theory
+is the following
+
+**Theorem**
+
+Let the rv X have distribution F, and h some function. Then
+
+E[h(X)] = ∫h(x)dF(x)
+
+**proof** 
+
+if X is a continuous rv, F has derivative f and so
+
+∫h(x)dF(x) =∫h(x)f(x)dx
+
+Say X is a discrete rv with P(X=a~j~)=f(a~j~),
+j=1,2,... Let x~1~ &lt;..&lt; x~n~, and we can always
+choose the x~i~'s such that x~i~≠a~j~ for all
+i and j. Now if x~k~ and x~k+1~ are such that none one
+the a~j~'s are between them we have
+
+F(x~k+1~)=F(x~k~)
+
+and so
+
+h(x~k~ )(F(x~k+1~)-F(x~k~)) = 0.
+
+On the other hand say we have x~k~&lt;a~j~
+&lt;x~k+1~. In that case let x~k~^\*^ =
+x~k~. Then  
+  
+![](graphs/sde7.png)
+
+So one advantage of the Riemann-Stiltjies integral in Probability theory
+is that often we do not need different formulas for discrete and
+continuous random variables.
+
+What is the reason for introducing the Riemann-Stiltjies integral? In
+effect it allows us to generalize the idea of the length of an interval.
+Instead of the "classic" b-a for the interval (a,b) we now have
+g(b)-g(a), and this allows us to do integration in much more general
+circumstances. Of course in Real Analysis this is not the end. An even
+more general notion of integral comes from allowing an even more general
+idea of the "size" of an interval, or more generally a set. This leads
+to the most widely used integral in Real Analysis, the Lebesgue integral
+defined by
+
+∫fdμ
+
+where μ is the so-called Lebesgue measure
+
+`r hl()$hr()`
+
+Now back to stochastic differential equations. In essence we can
+consider introducing a random variable in two ways into an integral ,
+either as
+
+∫X(t,ω)dt
+
+or
+
+∫f(t,ω)dX(t,ω)
+
+Now the first of these is in principle easy because this is just the
+regular Riemann integral. But unfortunately this alone does not lead to
+a useful theory. We need to try and define the second one.
+
+What type of stochastic process {X(t)} can we use here? There are
+several possible choices, but not surprisingly the most useful one is
+based on Brownian motion.
+
+How should we define the integral? Here we return to the idea of the
+Riemann integral to approximate the function f(.,ω) by a step function,
+so we need to decide how to define the integral for a step function. So
+let f be a step function. Because ultimately we can use any step
+function for the approximation let's divide the interval [a,b] into
+2^n^ subintervals of equal lengths, so
+
+x~k~ = a+k(b-a)/2^n^, k=0,..,2^n^
+
+and define  
+![](graphs/sde9.png)
+
+But we need to be careful. When approximating a function f in the
+interval [x~k~ ,x~k+1~) what should we choose for
+e~k~? Let's consider two possibilities:
+
+![](graphs/sde8.png)
+
+so unlike in ordinary integration here the choice of point in the
+subintervals matters!
+
+One can now play around with different choices (left endpoint? right
+endpoint? midpoint? ...) One of them leads to the  
+  
+**Definition** (Ito integral)
+
+let g(x) be a continuous function and let {B(t),t≥ 0} be a standard
+Brownian motion. For each fixed t&gt;0, there exists a random variable  
+![](graphs/sde10.png)  
+which is the limit of the approximating sums  
+![](graphs/sde12.png)  
+as n→∞.  
+  
+Another common choice is the midpoint which is called the *Stratonovich Integral*. In what follows, though, we will only consider the Ito
+integral, named after [Kiyoshi
+Ito](http://en.wikipedia.org/wiki/Kiyoshi_It%C5%8D)
+
+**Theorem**
+
+say f and g are functions, a is a constant, then
+
+Ψ(f+g) = Ψ(f)+Ψ(g)
+
+Ψ(af) = aΨ(f)  
+![](graphs/sde14.png)
+
+**proof**
+
+all of these follow directly from the definition of a sum of rv's
+
+**Theorem**
+
+The random variable Ψ(g) is normally distributed with mean 0 and
+variance  
+![](graphs/sde11.png)
+
+**proof**
+
+That the approximating sums are normal is easy as sums of normal rv's
+are normal. That this is also true in the limit is a consequence of the
+CLT.  
+Now
+
+![](graphs/sde13.png)
+
+**Theorem**
+
+Ψ(f) is a martingale
+
+**proof** omitted
+
+All the usual ways to find integrals have their equivalence here. For
+example, there is a version of the integration by parts formula:
+
+**Theorem**  
+
+Let g be some differentiable function, then  
+![](graphs/sde15.png)  
+**proof** 
+
+similar to the one for Riemann-Stiltjies integrals
+
+Using this formula we can find a number of useful stochastic processes:
+
+![](graphs/sde16.png)
+
+#### **Example**
+
+Let's find  
+![](graphs/sde18.png)  
+in analogy to the Riemann-Stiltjies integral we might guess the
+following:  
+![](graphs/sde19.png)
+
+but this turns out to be wrong! The problem is that now the "integrand"
+is also a random variable. Instead we will show that  
+![](graphs/sde21.png)
+
+First let  
+![](graphs/sde20.png)  
+and so
+
+∫B(s)dB(s) = ∫e^(n)^dB(s)
+
+as n→∞
+
+Next  
+![](graphs/sde22.png)  
+and so we see that Ito integrals don't behave like ordinary integrals.
+In the example above we eventually found the integral directly from the
+definition as a sum, but just like in ordinary integration this is very
+tedious. In order to make use of Ito integrals we need some formulas to
+help. We already have an equivalent to the integration by parts formula.
+We will now derive an equivalent of the change of variables formula.
+
+Let's again consider the above example, where we found  
+![](graphs/sde23.png)
+
+so we see that a function like g(B~t~) has two parts, one
+"usual" and one with dB~s~. This motivates the following
+
+**Definition**
+
+A *stochastic integral* is stochastic process {X(t)} of the form  
+![](graphs/sde24.png)
+
+sometimes this is written as
+
+dX~t~ = u dt +vdB~t~
+
+but note that this is just a shorthand for the equation above, despite
+the fact that this field is called stochastic differential equations
+there is actually only stochastic integration, not stochastic
+differentiation!
+
+In the case of our example then we find
+
+d(½B~t~^2^) = ½ dt + B~t~ dB~t~
+
+In general we have
+
+**Theorem** (Ito formula)
+
+Let X~t~ be a stochastic integral of the form
+
+dX~t~ = u dt +vdB~t~
+
+and let t → g(t,x) be some "reasonably" nice function. If Y~t~
+= g(t,X~t~) then Y~t~ is again a stochastic integral
+with  
+![](graphs/sde25.png)  
+with the convention that
+
+dt . dt = dt . dB~t~ = 0
+
+dB~t~ . dB~t~ =dt
+
+**proof**
+
+omitted
+
+#### **Example**
+
+Let X~t~ = B~t~ and g(t,x) =
+½x^2^. Then dg/dt=0, dg/dx=x and
+d^2^g/dx^2^=1, and so
+
+![](graphs/sde26.png)
+
+as before
+
+#### **Example**
+
+What is  
+![](graphs/sde27.png)
+
+Of course we can do this using the integration by parts formula:  
+![](graphs/sde28.png)
+
+but we can also use the Ito formula:  
+![](graphs/sde29.png)

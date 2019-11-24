@@ -1,0 +1,61 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Stochastic Processes
+
+
+Any collection of random vectors {**X**~t~,t∈T} is called a
+**stochastic process**. All the values that the random variables
+X~t~ can take on are called the **state space**. Because
+X~t~ is a regular random variable (or vector) we again
+differentiate between continuous and discrete state space cases.
+Moreover T can be discrete (1,2,..) or continuous (t&gt;0) as well.
+
+#### **Example** 
+
+Let X~i~~U[0,1], i=1,2,.. X~i~
+independent of X~j~, then {X~i~, i=1,2,..} is a
+continuous state space discrete time process.
+
+#### **Example** 
+
+Let X~i~∈{0,..,39} the position on the board of
+your token after i roles of the dice in a game of Monopoly. Then
+{X~i~, i=1,2,..} is a discrete state space discrete time
+process.
+
+#### **Example** 
+
+Let P(Z~i~=-1)=p=1-P(Z~i~=1),
+Z~i~ independent from Z~j~ if i≠j. Let  
+![](graphs/stoch1.png)  
+then X~n~∈{0,±1,±2,..} and so {X~n~, n=1,2,..} is a
+discrete state space discrete time process. This is a very famous
+stochastic process called a random walk.  
+  
+Here is a list of things we often want to know about a stochastic
+process:
+
+• what is the distribution of X~n~, especially in the limit?
+
+• what is EX~n~, especially in the limit?
+
+• what is cor(X~n~,X~n+k~)?

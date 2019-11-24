@@ -1,0 +1,151 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Functions of a R.V. - Transformations
+
+#### **Example**
+
+say X~U[0,1] and λ&gt;0. What is the pdf of the
+random variable Y=-λlog(X)?  
+
+Solution: we first find the cdf and then the pdf as follows:  
+![](graphs/prob41.png)  
+if y&gt;0. For y&lt;0 note that P(-logX&lt;y) = 0 because 0&lt;X&lt;1,
+so logX&lt;0, so -logX&gt;0 always.
+
+This is an example of a function (or *transformation*) of a random
+variable. These transformations play a major role in probability and
+statistics. We will see how to find their pdf's  on a few
+example**.
+
+#### **Example** 
+
+Say X is the number of roles of a fair die until the first
+six. We have already seen that P(X=x) = 1/6\*(5/6)^x-1^,
+x=1,2,.. Let Y be 1 if X is even, 0 otherwise. Find the of Y  
+Note: here both X and Y are discrete.  
+Solution:  
+
+![](graphs/prob42.png)  
+and P(Y=0) = 1 - P(Y=1) = 5/11
+
+#### **Example** 
+
+say X is a continuous r.v with pdf f~X~(x) =
+1/2exp(-|x|) $x\in \mathbb{R}$ (this is called a double
+exponential) Let Y=I~[-1,1]~(X). Find the of Y. 
+
+Note: here X is continuous and Y is discrete.  
+
+![](graphs/prob43.png)
+
+#### **Example** 
+
+again let X have pdf f~X~(x) = 1/2exp(-|x|)
+$x\in \mathbb{R}$. Let Y =X^2^. Then for y&lt;0 we have
+P(Y≤y) = 0. So let y&gt;0. Then  
+
+![](graphs/prob44.png)
+
+Next up some examples of functions of random vectors:
+
+#### **Example** 
+
+say (X,Y) is a bivariate standard normal r.v, that is it
+has joint density given by  
+
+![](graphs/prob45.png)  
+
+for $(x,y) \in \mathbb{R}^2$.
+
+Let the r.v. (U,V) be defined by U = X+Y and V = X-Y. Find the joint pdf of (U,V).
+
+To start let's define the functions g~1~(x,y) = x+y and
+g~2~(x,y) = x-y, so that U=g~1~(X,Y) and V =
+g~2~(X,Y).  
+
+For what values of u and v is f~(U,V)~(u,v) positive? Well, for
+any values for which the system of 2 linear equations in two unknowns
+u=x+y and u=x-y has a solution. These solutions are  
+
+x = h~1~(u,v) = (u + v)/2  
+y = h~2~(u,v) = (u - v)/2  
+
+From this we find that for any $(u,v) \in \mathbb{R}^2$ there is a unique $(x,y) \in \mathbb{R}^2$ such that u=x+y and v=x-y. So the transformation
+$(x,y) \rightarrow (u,v)$ is one-to-one and therefore has a Jacobian
+given by  
+
+![](graphs/prob46.png)  
+
+Now from multivariable calculus we have the following:  
+
+![](graphs/prob47.png)  
+
+Note that the density factors into a function of u and a function of v.
+
+This is not only a necessary but also a sufficient condition for U and V
+to be independent.
+
+#### **Example** 
+
+say X and Y are independent standard normal r.v.'s. Let Z =
+X + Y. Find the pdf of Z.  
+
+Note: now we have a transformation from $\mathbb{R}^2 \rightarrow \mathbb{R}$.  
+
+Note: Z = X + Y = U in the example above, so the pdf of Z is just
+the marginal of U and we find  
+
+![](graphs/prob48.png)
+
+Say X and Y are two continuous independent r.v with pdf 
+f~X~ and f~Y~, and let Z = X+Y. If we repeat the above
+calculations we can show that in general the pdf of Z is given by  
+
+![](graphs/prob49.png)  
+This is called the convolution formula.
+
+There is a second method for deriving the convolution formula which is
+useful. It uses a continuous analog to the law of total probability:  
+
+In the setup from above we have  
+
+![](graphs/prob411.png)  
+
+The tricky part of this is the interchange of the derivative and the
+integral. Working with densities and cdfs usually means they are ok.
+
+#### **Example** 
+
+Say X~1~, .., X~n~ are iid U[0,1]. Let M=max{X~1~, .., X~n~}. Find f~M~.
+
+![](graphs/prob410.png)  
+
+Note  
+
+![](graphs/prob412.png)  
+
+so we see that M~Beta(n,1), from which is follows for example that
+EM=n/(n+1)  
+
+M is an example of an **order** statistic. In general the k^th^
+largest observation of a sample is called the k^th^ order
+statistic

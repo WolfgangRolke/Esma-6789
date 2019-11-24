@@ -1,0 +1,329 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Stationary Processes and Ergodic Theory
+
+
+We have previously discussed the concept of stationarity in the context
+of Markov chains . We will now return to this topic.
+
+Probability theory is only useful in real life if we can connect the
+theory to experiments. For example, stochastic processes always have
+parameters such as the intensity of a Poisson process or the variance of
+a Brownian motion. These parameters need to be estimated from the data.
+If we can collect data X~1~,.., X~n~ that is
+independent we have the law of large numbers to assure that
+
+1/n∑X~i~ → E[X~1~]
+
+But what happens if we observe one realization of a stochastic process
+at different time points? When can we be sure that
+
+1/n∑X(t~i~)
+
+converges and if it does what is the limit?
+
+A stochastic process for which a law of large numbers holds and the
+limit is E[X] is called **ergodic**.
+
+It is intuitively clear that the sum can only converge once the process
+has become "stable", so that any individual contribution
+X(t~i~) does not greatly change the total. One condition for
+this is given in
+
+**Definition** 
+
+Let {X(t)} be a stochastic process. {X(t)} is called
+stationary iff for any k≥1 and h&gt;0 the random vectors
+
+(X(t~1~),..,X(t~k~)) and
+(X(t~1~+h),..,X(t~k~+h))
+
+have the same distribution. A process that is not stationary is called
+evolutionary.
+
+#### **Example**
+
+As we saw before Brownian Motion is a stationary process
+
+#### **Example** 
+
+Say {X(t);t≥0} is a Markov process with stationary
+distribution π.
+
+i) if the initial state X~0~ is chosen according to π the
+process is stationary.
+
+ii) if the process has run long it enough it might have reached its
+stationary regime.
+
+#### **Example** 
+
+Let X be some random variable on some sample space S. Let
+the function φ be "measure-preserving", that is φ maps subsets of S into
+subsets of S and
+
+P(φ^-1^ (A)) = P(A)
+
+Let φ^n^ be the n^th^ iteration of φ, and define a
+stochastic process {X~n~, n≥1} by
+
+X~n~(ω) = X(φ^n^ (ω))
+
+Then {X~n~, n≥1} is a stationary process.
+
+This last example is rather theoretical, but also most interesting
+because it is essentially the only example! That is using a famous
+theorem called Kolmogorov's extension theorem it can be shown that any
+stationary process can be expressed in this form.
+
+#### **Example** 
+
+in a Markov chain the mapping φ is given by the transition
+matrix.
+
+Now for the main result:
+
+**Theorem** (Birkhoff's Ergodic Theorem 1931)
+
+For any X such that E[|X|]&lt;∞
+
+![](graphs/ergodic1.png)
+
+**proof**
+
+omitted
+
+
+In general it is quite difficult to prove stationarity of a stochastic
+process because of the requirement to hold for all k and h. Often,
+though it is enough to show a weaker version called covariance
+stationarity. To define it we begin with
+
+**Definition** 
+
+Let {X(t)} be a stochastic process. Then the mean value
+function m and the covariance kernel K are defined as
+
+m(t) = E[X(t)]
+
+K(s,t) = Cov(X(s),X(t)
+
+#### **Example** 
+
+Let {B(t)} be Brownian motion, then we have
+
+m(t) = 0
+
+K(s,t) = σ^2^min{s,t}
+
+#### **Example** 
+
+Let {N(t)} be a Poisson process with intensity λ, then we
+have
+
+m(t) = E[N(t)] = λt
+
+say s&lt;t, then
+
+K(s,t) =
+
+Cov(N(s),N(t) =
+
+Cov(N(s),N(t)-N(s)+N(s)) =
+
+Cov(N(s),N(t)-N(s)) + Cov(N(s),N(s)) = (by independent increments)
+
+0 + Var(N(s)) = λs
+
+and by symmetry we find
+
+K(s,t) = λmin{s,t}
+
+------------------------------------------------------------------------
+
+Note that the above derivation only depends on the property of
+independent increments, so for any such process we have
+
+K(s,t) = Var(X(min{s,t}))
+
+#### **Example** 
+
+Let {N(t)} be a Poisson process with intensity λ, let L&gt;0
+and define the process X(t)=N(t+L)-N(t). So X(t) is the number of events
+in a time interval of length L starting at t. {X(t)} is sometimes called
+the Poisson increment process.
+
+Now
+
+m(t) = E[X(t)] = E[N(t+L)-N(t)] = λ(t+L)- λt = λL
+
+let s&lt;t. If t&gt;s+L X(t) and X(s) are independent by independent
+increments and so K(s,t)=0.
+
+If s&lt;t&lt;s+L we find
+
+K(s,t) =
+
+Cov[N(s+L) - N(s), N(t+L) - N(t)] =
+
+Cov[N(s+L) - N(t) + N(t) - N(s), N(t+L) - N(t)] =
+
+Cov[N(s+L) - N(t), N(t+L) - N(t)] + Cov[N(t) - N(s), N(t+L) - N(t)]
+=
+
+Cov[N(s+L) - N(t), N(t+L) - N(t)] + 0 =
+
+Cov[N(s+L) - N(t), N(t+L) - N(s+L) + N(s+L) - N(t)] =
+
+Cov[N(s+L) - N(t), N(t+L) - N(s+L)] + Cov[N(s+L) - N(t), N(s+L) -
+N(t)] =
+
+0+ Cov[N(s+L) - N(t), N(s+L) - N(t)] =
+
+Cov[N(s+L) - N(t), N(s+L) - N(t)] =
+
+Var[N(s+L) - N(t)] =
+
+λ(L-(t-s))
+
+so we find
+
+K(s,t) = λ(L-|s-t|) if |s-t|&lt;L and 0 otherwise
+
+**Definition** 
+
+a stochastic process {X(t)} is called *covariance stationary* if
+
+i) Var[X(t)]&lt;∞ ∀t≥0
+
+ii) K(s,t) = R(t-s)
+
+for some function R
+
+Sometimes the concept of covariance stationarity is also called "weakly
+stationary" or "second order stationary"
+
+Note:
+
+R(x) = Cov[X(t),X(t+x)]
+
+#### **Example**
+
+the Poisson increment process is covariance stationary with
+R(x) = λ(L-|x|) if |x|&lt;L and 0 otherwise
+
+Before we can continue we need a definition from real analysis
+
+**Definition** 
+
+let {a~n~} be a sequence of real numbers. The
+sequence is said to converge in *Cesaro means* if
+
+1/n∑a~n~ → 0
+
+It can be shown that ordinary convergence implies convergence in Cesaro
+means but not vice versa
+
+#### **Example** 
+
+let a~n~ = (-1)^n^ then clearly
+a~n~ does not converge but
+
+|1/n∑a~n~| ≤ 1/n → 0
+
+We can now proof the following ergodic theorem:
+
+
+**Theorem** 
+
+Let (X~n~,n=1,2,..} be a stochastic process with
+covariance kernel K(s,t) such that
+
+Var[X~n~] ≤ K~0~ for all n
+
+Let M~n~=1/n∑X~i~ be the n^th^ sample mean
+and let
+
+C(n) = Cov[X~n~ ,M~n~]
+
+Then
+
+lim~n→∞~C(n) = 0 iff lim~n→∞~Var[M~n~] = 0
+
+Remarks
+
+i) C(n) = Cov[X~n~ ,M~n~] =Cov[X~n~
+,1/n∑X~i~ ] = 1/n∑Cov[X~n~ ,X~i~] =
+1/n∑K(i,n)
+
+ii) if the process is covariance stationary
+
+C(n) = 1/n∑K(i,n) = 1/n∑R(i-n) = 1/n∑R(i)
+
+so the theorem says that the sequence is ergodic iff R(n) converges in
+Cesaro means, which will follow if we can show ordinary convergence
+
+Now to the
+
+**proof**
+
+lim~n→∞~Var[M~n~] = 0 ⇒ lim~n→∞~C(n) = 0
+
+This follows directly from the Cauchy-Schwartz inequality:  
+![](graphs/ergodic2.png)
+
+lim~n→∞~C(n) = 0 ⇒ lim~n→∞~Var[M~n~] = 0
+
+we start with  
+![](graphs/ergodic3.png)  
+and so we need to show that  
+![](graphs/ergodic4.png)
+
+#### **Example** 
+
+{B(t),t≥0} standard Brownian motion, then
+
+Var[B(t)] = t
+
+is unbounded and so the theorem does not apply, even so we know from the
+theory of Markov processes that Brownian motion is ergodic
+
+#### **Example** 
+
+Let {X(t)} be a Poisson increment process with intensity λ
+and lag L, then
+
+R(k) = λ(L-k) if k &lt;L and 0 otherwise
+
+Var[X(t)] = R(0) = λL = K~0~ &lt; ∞
+
+also
+
+C(n) =
+
+1/n∑R(i) =
+
+1/n [ R(1) +..+ R(n) ] =
+
+1/n [ R(1) +..+ R(L) ] → 0 as n→∞
+
+and so this process is ergodic

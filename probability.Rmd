@@ -1,0 +1,223 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+
+# Probability 
+ 
+## Basics of Probability Theory
+
+
+**Kolmogorov's Axioms and Some Consequences**
+
+Modern probability, like geometry, is built on a small set of basic
+rules called axioms, derived in the 1930's by Kolmogorov. They are:  
+![](graphs/prob02.png)  
+if A~1~, A~2~, ... are mutually exclusive.  
+
+#### **Example**: Derive the formula for the probability of a sample space
+with equally likely outcomes from the axioms  
+![](graphs/prob03.png)
+
+So in this case finding probabilities becomes a counting exercise.
+
+**Proposition**
+
+**Complement**: P(A) = 1 - P(A^c^)  
+  
+**Addition Formula**: P(A$\cup$ B) = P(A)+P(B)-P(A∩B)
+
+**Subset** if A$\subset$ B then P(A)≤P(B)  
+  
+**Boole's inequality** P(∪A~i~) ≤ ∑ P(A~i~)  
+
+**Definition**
+
+Let {A~n~, n≥1} be a sequence of events. Then  
+  
+a) the sequence is called increasing if
+A~n~$\subset$  A~n+1~  
+  
+If {A~n~, n≥1} is an increasing sequence of events we define
+the new event lim A~n~ by  
+  
+lim A~n~ = $\cup$ A~n~
+
+b) the sequence is called decreasing if
+A~n+1~$\subset$ A~n~  
+  
+If {A~n~, n≥1} is a decreasing sequence of events we define the
+new event lim A~n~ by  
+  
+lim A~n~ = ∩A~n~
+
+**Proposition**
+
+If {A~n~, n≥1} is either an increasing or a decreasing sequence
+of events then  
+  
+limP(A~n~) = P(lim A~n~)  
+  
+  
+#### **Example** 
+
+Consider a population consisting of individuals able to
+produce offspring of the same kind. The number of individuals initially
+present, denoted by X~0~, is called the size of the zero'th
+generation. All offspring of the zero'th generation constitute the first
+generation and their number is denoted by X~1~. In general, let
+X~n~ denote the size of the n^th^ generation.  
+  
+Let  
+A~n~ = {X~n~=0}  
+  
+Now since X~n~=0 implies X~n+1~=0, it follows that
+{A~k~, k≥n} is an increasing sequence and thus lim
+P(A~n~) exists. What is the meaning of this probability? we
+have
+
+  
+lim P(X~n~=0) = lim P(A~n~) =  
+P(lim A~n~) =  
+P( $\cup$ A~n~ )=  
+P( $\cup$  {X~n~=0} )=  
+P(the population eventually dies out)
+
+**Proposition** (Borel-Cantelli lemma)
+
+Let A~1~, A~2~, .. be sequence of events. If
+∑P(A~i~) &lt; ∞ then  
+P(an infinite number of A~i~ occur) =0
+
+#### **Example**
+
+Let X~1~, X~2~, .. be such that
+P(X~n~=0)=1/n^2^ = 1-P(X~n~=1)
+
+Let A~n~={X~n~=0}. Now ∑P(A~n~) =
+∑1/n^2^ &lt; ∞, so it follows that the probability that
+X~n~ equals 0 for an infinite number of n is also 0. Hence, for
+an n sufficiently large X~n~ must equal 1.
+
+**Definition**
+
+a) Two events A and B are said to be independent if
+
+P(A∩B)=P(A)P(B)  
+  
+b) A set of events {A~i~,i=1,∞} is said to be independent if
+for any set of indices {i~1~,..,i~n~) we have  
+![](graphs/prob010.png)
+
+**Proposition** (Converse to the Borel-Cantelli lemma)
+
+If A~1~, A~2~, .. are independent events such that
+∑P(A~i~) = ∞ then P(an infinite number of the A~i~'s
+occur) =1
+
+**Definition**
+
+Say A and B are events, then the conditional probability of "A given B"
+is defined as  
+![](graphs/prob011.png)  
+if P(B)&gt;0
+
+Note above we had the formula for two events to be independent. Now if A
+and B are independent we have  
+  
+P(A|B) = P(A∩B)/P(B) = P(A)P(B)/P(B) = P(A)
+
+so two events are independent if the knowledge that one event occurred
+does not change the probability of the other. For example the
+probability that a second flip of a fair coin results in heads is not
+changed by whether the first flip was heads or not.
+
+It is important to notice that conditional probabilities are just like
+regular ones, for example they obey the Axioms:
+
+Axiom 1:
+
+P(A|B) = P(A∩ B)/P(B)
+
+but
+
+P(A∩ B) and P(B) are both regular probabilities, so
+
+P(A∩ B)≥0, P(B)&gt;0
+
+so
+
+P(A|B)=P(A∩ B)/P(B)≥0
+
+  
+Also A∩ B $\subset$ B, so P(A|B)=P(A∩ B)/P(B)≤P(B)/P(B)=1
+
+Axiom 2: P(S|B)=P(S∩ B)/P(B)=P(B)/P(B)=1
+
+Axiom 3: say A~1~,..,A~n~ are mutually exclusive,
+then  
+![](graphs/prob013.png)
+
+**Proposition**
+
+P(A∩B) = P(A)P(B|A)
+
+**Definition**
+
+A set of events {A~n~} is called a **partition** of the sample
+space if  
+  
+A~i~∩A~j~=Ø for all i≠j
+
+and
+
+$\cup$ A~i~=S
+
+**Proposition** (Law of Total Probability)
+
+Say the events {A~n~} form a **partition** of S, and let
+B$\subset$ S, then
+
+P(B) =∑P(B|A~i~)P(A~i~)
+
+**Proposition** (Bayes' formula)
+
+Say the events {A~n~} form a **partition** of S, and let
+B$\subset$ S, then  
+![](graphs/prob016.png)  
+Notice that the denominator is just the law of total probability, so we
+could have written the formula also in this way:  
+  
+P(A~k~|B) = P(B|A~k~)P(A~k~)/P(B)
+
+#### **Example**
+
+say you play the following game: first you roll a fair die,
+then you flip a coin as many times as the roll was. Given that you got 3
+"heads", what is the probability you rolled a 5?
+
+Let A~i~= {roll was i}, i=1,2.,,.6}
+
+and
+
+B = "3 heads"
+
+then
+
+![](graphs/prob017.png)

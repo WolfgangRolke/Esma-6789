@@ -1,0 +1,456 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Renewal Theory
+
+
+In this section we will study another generalization of the Poisson
+process. There we had a counting process with interarrival times that
+were iid exponential. Now we will allow other distributions for the
+interarrival times.
+
+Let {X~n~;n≥1} be a sequence of nonnegative iid rv's with
+common cdf F. Let {N(t);t≥0 } be counting process such that
+X~n~ is the time between the (n-1)^st^ and the
+n^th^ event. Then {N(t);t≥0 } is called a renewal process, and
+the times when an event happens are called "renewals".
+
+In order to avoid some technical issues we will also assume that
+F(0)=P(X~n~=0)&lt;1. The condition F(0)&lt;1 means that there
+is some chance that the process stays in the same state for some time,
+it does not (necessarily) immediately jump away.
+
+Let μ=E[X~n~] denote the mean time until the next event, and
+note that because of the condition that X~n~ be nonnegative we
+have 0&lt;μ≤∞.
+
+Set S~0~=0 and
+S~n~=∑~i=1~^n^X~i~
+
+so S~n~ is the time of the n^th^ event (or renewal).
+As the number of events by time t will equal the largest value of n for
+which the n^th^ event has occurred before or at time t, we
+have  
+
+N(t) = max{n: S~n~≤t}
+
+Here is the reasoning: say S~4~≤t and S~5~&gt;t so the
+fourth renewal had occurred before time t but the fifth renewal occurred
+after time t, so N(t), the number of renewals at time t, is 4
+
+  
+Note that S~n~ is the sum of independent identically
+distributed rv's, so by the law of large numbers
+
+S~n~/n → μ in probability.
+
+Since μ&gt;0 this means that S~n~ must be going to infinity as
+n goes to infinity. Thus S~n~ can be less than or equal to any
+finite t for at most a finite number of n. Hence N(t) must be finite
+with probability 1.
+
+For the Poisson process we found that
+
+N(t)≥n ![](graphs/darrow.png) S~n~≤t
+
+The same equivalence holds here and can in principle be used to find the
+distribution of N(t):  
+![](graphs/renew1.png)  
+Now since the {X~i~;i≥1} are iid F, it follows that
+S~n~=∑~i=1~^n^X~i~ has cdf
+F~n~, the n-fold convolution of F. Therefore we find
+
+  
+P(N(t)=n) = F~n~(t)-F~n+1~(t)
+
+#### **Example** 
+
+let's find out what this means in a case where we already
+know the answer: say X~n~~Exp(μ). So the interarrival times
+have an exponential distribution, therefore this should be a regular
+Poisson process. Now
+
+![](graphs/renew18.png)  
+
+![](graphs/renew19.png)
+
+so this works fine. The difficulty in using this theorem is usually
+calculating the n-fold convolution
+
+#### **Example** 
+
+Say X~n~~Ber(p). So S~n~ is the sum of
+independent Bernoulli rv's, and so S~n~~B(n,p). Now
+
+  
+![](graphs/renew5.png)
+
+  
+Let m(t)=E[N(t)]. m(t) is called the renewal function, and one of the
+main issues in renewal theory is to determine its properties. To find it
+we first need a well-know lemma:
+
+**Lemma**
+
+Say X is a non-negative rv. Then  
+![](graphs/renew6.png)  
+proof see Theory of Probability  
+
+**Proposition**
+
+m(t)= ∑~n=1~^∞^ F~n~(t)
+
+**proof**
+
+![](graphs/renew2.png)
+
+#### **Example**
+
+again let's find out what this means in a case where we
+already know the answer: say X~n~~Exp(μ). So the interarrival
+times have an exponential distribution, therefore this should be a
+regular Poisson process, and therefore m(t)=μt. To make the calculation
+easier let's define
+
+![](graphs/renew20.png)
+
+**Proposition**
+
+m(t)&lt;∞ $\forall$  0≤t&lt;∞
+
+without proof
+
+Let's assume the interarrival times X~n~ have a continuous
+distribution F. Then we find
+
+  
+![](graphs/renew7.png)  
+Now suppose that the time of the first renewal x is less than t. Then,
+using the fact that a renewal process essentially starts over when a
+renewal occurs, it follows that the number of renewals by time t would
+have the same distribution as 1 plus the number of renewals in the first
+x-t time units. Therefore  
+![](graphs/renew8.png)
+
+#### **Example**
+
+again let's find out what this means in a case where we
+already know the answer: say X~n~~Exp(μ). So the interarrival
+times have an exponential distribution, therefore this should be a
+regular Poisson process, and therefore m(t)=μt. We will do this simply
+by verifying that m(t)=μt satisfies the integral equation:  
+![](graphs/renew21.png)
+
+  
+#### **Example**
+
+say X~n~~U[0,1] let t&lt;1, then
+
+  
+![](graphs/renew9.png)
+
+unfortunately this is one of the few cases were these calculations can
+be done analytically. Quite generally integral equations are hard to
+solve.
+
+------------------------------------------------------------------------
+
+Next we will derive one of the main results known as the *elementary
+renewal theorem :*
+
+**Theorem**
+
+m(t)/t→1/μ as t→∞
+
+**proof**
+
+We begin by considering S~N(t)~. N(t) is the number of arrivals
+at time t. S~n~ is the time of the n'th arrival , so
+S~N(t)~ is the time of the last event prior to or at time t.
+Similarly S~N(t)+1~ is the time of the first arrival after time
+t.
+
+Here is an illustration:  
+![](graphs/renew10.png)
+
+### **Proposition**
+
+N(t)/t →1/μ as t→∞ with probability 1
+
+**proof**
+
+clearly we have S~N(t)~ ≤ t &lt; S~N(t)+1~, so
+
+  
+![](graphs/renew11.png)  
+Note that the same proof works even if μ=∞, with 1/μ=0
+
+The number 1/μ is called the *rate* of the renewal process.
+
+The elementary renewal theorem follows from this, with some technical
+details we will omit.
+
+**Remark** 
+
+it might seem that
+
+m(t)/t→1/μ as t→∞
+
+should just follow directly from the fact that
+
+N(t)/t→1/μ as t→∞
+
+but things turn out to be a bit more complicated:
+
+#### **Example**: 
+
+Say U~U[0,1], and let Y~n~ =
+n I~[0,1/n]~(U). Now
+
+P(|Y~n~ -0|&gt;ε) = P(Y~n~&gt;ε) = 1/n → 0 if n&gt;1/ε
+
+so Y~n~ → 0 in probability.
+
+but E[Y~n~] = nP(U&lt;1/n) = n(1/n) = 1
+
+#### **Example** 
+
+You have a radio which uses a single battery. When the
+battery fails you replace it with a new one. Say a battery has a
+lifetime with a U[30,60] distribution, then at what rate do you change
+batteries?
+
+let N(t) be the times when the batteries failed, then N(t)/t →1/μ = 1/45
+
+#### **Example** 
+
+Say we play the following game: we pick cards form a
+standard card deck (52 cards). After each draw we put the card back and
+shuffle. We do this until the same card gets drawn twice in a row. What
+is the expected number of trials needed?
+
+Actually let's consider a much more general game: in each trial there
+are n items numbered 1-n to choose from, and item i is chosen with
+probability p~i~. What is the expected number of trials until
+an item is chosen k times in a row?
+
+We begin by computing the expected number of Bernoulli trials with
+success probability p until k successive successes occur. Let this be
+E[T]. Let Z be the first time a failure occurs, then of course
+Z~Geom(1-p). Now  
+![](graphs/renew12.png)  
+For example, when flipping a fair coin the expected number trials needed
+until 5 "heads" in a row is
+
+(1-(½)^5^)/{(½)^5^(1-½))} =
+(1-(½)^5^)/(½)^6^ = 48
+
+Let's return to the game and assume that as soon as one "round" ends we
+play again, and so on. For each i let us determine the rate at which
+item i is the "winner" (appears first k times in a row). Now, every time
+this happens constitutes a renewal. Let N~i~ be the number of
+trials between successive wins of i, then by the renewal theorem
+
+Rate at which i wins =1/E[N~i~]
+
+But now we are only interested in "i wins", so each trial is a Bernoulli
+trial and the above shows  
+![](graphs/renew13.png)
+
+and so the long run proportion of games won by i is  
+![](graphs/renew14.png)  
+and by the strong law of large numbers this is also the probability that
+i wins.
+
+Finally, the
+
+rate at which games end =
+
+∑ rate at which games i wins =  
+![](graphs/renew15.png)
+
+Now, as everything starts over when a game ends, it follows from the
+elementary renewal theorem that the rate at which games end is equal to
+the reciprocal of the mean time of a game, so  
+![](graphs/renew16.png)  
+As a numerical example, say we roll a die until the same number gets
+rolled 4 times in a row. What is the expected number of rolls?
+
+Now p~i~=1/6 i=1,..,6, so  
+![](graphs/renew17.png)  
+
+------------------------------------------------------------------------
+
+Above we saw essentially a Weak Law of Large Numbers for renewal
+processes. Next we have a Central Limit Theorem
+
+**Theorem** 
+
+Let μ and σ be the mean and the standard deviation of an
+interarrival time. Let Z~N(0,1). Then  
+![](graphs/renew22.png) 
+
+**proof**
+
+Let
+
+r~t~ = t/μ +yσ√t/μ^3^. Note that r~t~→∞ as
+t→∞. Then  
+![](graphs/renew23.png)
+
+**Definition**  
+
+A nonnegative rv X is said to be *lattice* if there exists d≥0 such that
+
+∑~n~P(X=nd) = 1
+
+That is, X is lattice if it only takes values that are integral
+multiples of some nonnegative number d. The largest d having this
+property is called the period of X. If F is the distribution of a rv X
+that is lattice, F is also called lattice.
+
+**Theorem (Blackwell)**
+
+i) if F is not lattice, then
+
+m(t+a)-m(t) → a/μ
+
+ii) if F is lattice with period d, then
+
+E[number of renewals at nd] → d/μ
+
+**proof (outline)**
+
+i) let
+
+g(a) = lim~t→∞~[m(t+a)-m(t)]
+
+and we will assume that this limit exists (the missing part of the
+proof). Now
+
+g(a+b) =
+
+lim~t→∞~[m(t+a+b)-m(t)] =
+
+lim~t→∞~[m(t+a+b)-m(t+a) + m(t+a)-m(t)] =
+
+lim~t→∞~[m(t+a+b)-m(t+a)] + lim~t→∞~[m(t+a)-m(t)]=
+
+g(b) + g(a)
+
+for any a, b. But
+
+g(a) = g(a+0) = g(a)+g(0)
+
+so g(0)=0
+
+Also
+
+g(a+h)-g(a) = g(a)+g(h)-g(a) = g(h)
+
+so g'(a) = lim~h→0~ [(g(a+h)-g(a)/h] =lim~h→0~
+[g(h)/h] =: c
+
+so g(a) =ca
+
+What is c? To find out define
+
+x~n~ = m(n) - m(n-1) n=1,2,..
+
+Then
+
+lim~n→∞~[m(n+1)-m(n)] = g(1) = c
+
+and therefore
+
+lim~n→∞~[(x~1~+..+x~n~)/n] = c
+
+or
+
+lim~n→∞~[m(n)/n] = c
+
+but by the elementary renewal theorem c = 1/μ
+
+ii) when F is lattice with period d clearly this limit can not exist
+because it would have to depend on how many points of the form nd are in
+the interval. So the relevant version of the theorem concerns the limit
+at points of the form nd, and again the result follows from the
+elementary renewal theorem.
+
+------------------------------------------------------------------------
+
+**Definition**
+
+Let h be a function on [0,∞). For any a&gt;0 define
+
+m~n~(a) = inf{h(t); (n-1)a ≤ t ≤ na}
+
+and
+
+M~n~(a) = sup{h(t); (n-1)a ≤ t ≤ na}  
+
+h is called *directly Riemann integrable* if
+
+∑~n~ m~n~(a) and ∑~n~ M~n~(a) are
+finite for all a&gt;0 and
+
+lim~a→0~ a∑~n~ m~n~(a) = lim~a→0~
+a∑~n~ M~n~(a)
+
+**Theorem**
+
+say we have
+
+i) h(t)≥0 for all t ≥0
+
+ii) h(t) is non increasing
+
+iii) ∫h(t)dt &lt; ∞
+
+then h is directly Riemann integrable
+
+**proof omitted**
+
+**Theorem (The Key Renewal Theorem)**
+
+If F is not lattice, and if h(t) is directly Riemann integrable, then
+
+![](graphs/renew24.png)
+
+**proof omitted**
+
+**Lemma**  
+
+Let S~N(t)~ be the time of the last renewal before time t.
+Then  
+  
+![](graphs/renew25.png)  
+**proof**  
+![](graphs/renew26.png) 
+
+#### **Example**
+
+say {N(t)} is a Poisson process with rate λ, then
+
+1-F(t) = exp(-λt)
+
+and  
+![](graphs/renew27.png)

@@ -1,0 +1,399 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Brownian Motion
+
+### Basic Properties
+
+```{r echo=FALSE}
+brown <- function (which = 1, n = 1000,x=0) 
+{
+    if (which == 1) {
+#        par(mfrow = c(1, 1))
+        t <- seq(0, 10, length = n)
+        BM <- cumsum(2 * rbinom(n, 1, 0.5) - 1) * sqrt(t[2] - t[1])
+        plot(t, BM, type = "l", xlab = "t", ylab = "BM(t)")
+        if(x>0) {
+            BMStar=ifelse(BM<x,BM,2*x-BM)            
+            plot(t, BM, type = "l", xlab = "t", ylab = "BM(t)",ylim=range(BM,BMStar))            
+            abline(h=x,lwd=2)
+            lines(t,BMStar,col="red")
+        }
+    }
+    if (which == 2 || which == 3) {
+        par(mfrow = c(2, 2))
+        t <- matrix(0, n, 4)
+        for (i in 1:4) {
+            t[, i] <- seq(0, 0.1, length = n) * 10^(i - 1)
+            X <- cumsum(2 * rbinom(n, 1, 0.5) - 1) * sqrt(t[2, 
+                i] - t[1, i])
+            if (which == 2) {
+                plot(t[, i], X, type = "l", xlab = "t", ylab = "X(t)", 
+                  axes = F)
+                box()
+            }
+            else {
+                plot(t[, i], X, type = "l", xlab = "t", ylab = "X(t)")
+            }
+        }
+    }
+    
+}
+```
+
+In 1827 the English botanist Robert Brown observed that microscopic
+pollen grains suspended in water perform a continual swarming motion.  
+This phenomenon was first explained by Einstein in 1905 who said the
+motion comes from the pollen being hit by the molecules in the
+surrounding water. The mathematical derivation of the Brownian motion
+process was first done by Wiener in 1918, and in his honor it is often
+called the Wiener process.
+
+Brownian motion is a continuous-time continuous state-space stochastic
+process defined as follows:
+
+the process {B(t),t≥0} is a Brownian motion process iff  
+  
+1) B(0)=0  
+2) {B(t),t≥0} has stationary and independent increments  
+3) for all t&gt;0 B(t)~N(0,σ√t)
+
+Note: in the case of a continuous-time stochastic process we have:
+
+• the process {X(t);t≥0} has stationary increments iff the distribution
+of X(t+s)-X(t) depends only on s
+
+• the process {X(t);t≥0} has independent increments iff for
+t~1~&lt;t~2~&lt;t~3~
+X(t~3~)-X(t~2~) is independent of
+X(t~2~)-X(t~1~)
+
+**Lemma**
+
+A Brownian motion process is a Markov Process and a Martingale
+
+**proof**
+
+![](graphs/brown21.png)
+
+by independent and stationary increments.  
+![](graphs/brown22.png)
+
+So Brownian motion is a continuous-time continuous-state space Markov
+process and a Martingale. In fact BM has just about all the "nice"
+properties of stochastic processes we encountered earlier.
+
+The Brownian motion process plays a role in the theory of stochastic
+processes similar to the role of the normal distribution in the theory
+of random variables.
+
+If σ=1 the process is called standard Brownian motion.
+
+One way to visualize a Brownian motion process is as the limit of
+symmetric random walks: Let {Z~n~,n≥1} be the symmetric random
+walk on the integers. If we now speed the process up and scale the jumps
+accordingly we get a Brownian motion process in the limit. More
+precisely, suppose we jump every δt and make a jump of size δx. if we
+let Z(t) denote the position of the process at time t then  
+![](graphs/brown1.png)  
+Here are some sample paths of a standard Brownian
+motion process.
+
+```{r echo=FALSE}
+par(mfrow=c(2, 2))
+for(i in 1:4) brown(1)
+```
+
+
+### Covariance Function
+
+Let {B(t);t≥0} be BM, then E[B(t)]=0 and
+E[B(t)^2^]=σ^2^t for all t. Let 0&lt;s&lt;t, then  
+![](graphs/brown12.png)
+
+so in general Cov(B(t),B(s))=σ^2^min(t,s)
+
+**Lemma**
+
+say s&lt;t. Then  
+![](graphs/brown26.png)
+
+**proof**  
+![](graphs/brown25.png)
+
+
+
+This generalizes immediately to  
+![](graphs/brown28.png)
+
+and we can see that the joint distribution of a BM is multivariate
+normal.
+
+
+From this we can (in principle) compute any probability. For example
+let's say we want to find the conditional distribution of B(s)|B(t)=B
+where s&lt;t:
+
+  
+![](graphs/brown27.png)
+
+and so B(s)|B(t)=b ~ N(sb/t,√s(t-s)/t )
+
+Note that the variance of B(s)|B(t)=b does not depend on b!
+
+**Definition**
+
+A stochastic process {X(t),t≥0} is called a **Gaussian process** if for
+any 0&lt;t~1~&lt;..&lt;t~n~ the random vector
+(X(t~1~),..X(t~n~)) has a multivariate normal
+distribution.
+
+#### **Example**
+
+as we saw above Brownian motion is a Gaussian process
+
+#### **Example**
+
+let {B(t),t≥0} be BM and define
+
+{X(t),0≤t≤1} by X(t)=B(t)|B(1)=0.
+
+This process is called *Brownian bridge* because it is "tied down" at 0
+and 1.
+
+The same argument as above shows that a Brownian bridge is also a
+Gaussian process. Now  
+![](graphs/brown29.png)
+
+Here is another way to define the Brownian bridge process:  
+  
+**Lemma** 
+
+let {B(t),t≥0} be BM and define
+
+{X(t),0≤t≤1} by X(t)=B(t)-tB(1)
+
+then {X(t),0≤t≤1} is a *Brownian bridge* process.
+
+**proof**  
+Clearly {X(t),0≤t≤1} is a Gaussian process, so all we need to do is
+check that it has the right mean and covariance function:  
+![](graphs/brown30.png)
+
+#### **Example**: (Empirical Distribution Function)
+
+Say we have observations (X~1~,..,X~n~). Then in
+statistics we define the *empirical distribution function* by
+
+![](graphs/brown31.png)
+
+Now N~n~(s) = nF~n~(s)~Bin(n,F(s))  
+  
+Now by the strong law of large numbers we have F~n~(s)→F(s) and
+by the Glivenko-Cantelli lemma this convergence is uniform in s, that is
+
+sup|F~n~(s)-F(s)|→0
+
+as n→∞
+
+Moreover by the Central Limit Theorem √n[F~n~(s)-F(s)] has an
+asymptotic normal distribution with mean 0 and variance F(s)(1-F(s)).
+
+To continue we will assume that F=U[0,1], so that F(s)=s. This is in
+fact not much of a restriction because if X is a continuous rv with
+distribution F then by the probability integral transform
+Y=F(X)~U[0,1].
+
+Define
+
+α~n~(s)=√n[F~n~(s)-s]
+
+and let
+
+α(s) = lim~n→∞~ α~n~(s)
+
+Then {α(s),0&lt;s&lt;1} is a stochastic process. To find out what kind
+of process it is first note that if s&lt;t
+
+N~n~(t)-N~n~(s)|N~n~(s)=m ~
+Bin(n-m,(t-s)/(1-s))
+
+because it is the number of jumps between s and t if we know there were
+already m jumps at s.
+
+Again using the CLT is seems clear that the joint distribution of α(s)
+and α(t) is a bivariate normal, and in fact that {α(s),0&lt;s&lt;1} is a
+Gaussian process.
+
+To continue first note that N~n~(s)~Bin(n,s) and therefore
+
+EN~n~(s) = ns
+
+VarN~n~(s) = ns(1-s)
+
+E[N~n~(s)^2^] = VarN~n~(s) +
+[EN~n~(s)]^2^ = ns(1-s)+n^2^s^2^ =
+ns(1-s+ns)
+
+Now
+
+![](graphs/brown32.png)
+
+### Continuity and Differentiability
+
+When studying a continuous-time stochastic process it is often useful to
+think of any particular realization of the process as a function. Say S
+is the sample space of the process, that is the set of all possible
+paths {X(t),t≥0}, and let w$\in$ S. Then f(t) = X(t,ω) is
+a function. (Usually we suppress ω, though).
+
+In the case of BM, what are the properties of a typical realization
+B(t)? First let's look at continuity:  
+  
+Now by the definition we have that B(t+h)-B(t) ~ N(0,√h), therefore
+E[(B(t+h)-B(t))^2^] = h and so the size of an increment of
+|B(t+h)-B(t)| is about √h. So as h→0 √h→0 which implies continuity.  
+  
+How about differentiability? Now we have  
+![](graphs/brown4.png)  
+and we see that BM is nowhere differentiable!  
+(Of course this is rather heuristic but it can be made rigorous).
+
+The idea of functions that are continuous but nowhere differentiable has
+a very interesting history. It was first discussed in 1806 by André
+Marie Ampère and trying to show that such a function exists was one of
+the main open problems during the 19^th^ century. More than
+fifty years later it was Karl Theodor Wilhelm Weierstrass who finally
+succeeded in constructing such a function as follows:  
+![](graphs/brown5.png)
+
+The hard part here was not the construction but to show that the
+function existed! For the proof he developed what is now known as the
+Stone-Weierstrass theorem.
+
+Shorty after that a new branch of mathematics called functional analysis
+was developed. It studies the properties of real-valued functions on
+function space. Here are some examples of such functionals:  
+![](graphs/brown6.png)  
+Of course one needs to specify the space of functions for which a
+certain functional applies. Standard "function spaces" are C, the space
+of all continuous functions and C^1^, the space of all
+continuous functions with a continuous derivative.  
+  
+One of the results of functional analysis is that C is much larger than
+C^1^, actually of a higher order of infinity, shown with the
+**Baire category theorem**. So consider the following "experiment": pick
+any continuous function in C. Then the probability that it has a
+continuous derivative anywhere is 0! So functions such as Weierstrass
+(or the paths of BM) are not the exception, they are the rule. Or, all
+the functions we study in mathematics are completely irrelevant in
+nature.
+
+### The Reflection Principle
+
+Let B(t) be standard BM. Let x&gt;0 and t&gt;0. Consider a path of BM
+with B(0)=0 and B(t)&gt;x. Then because of the continuity of the paths
+by the *intermediate value theorem* there has to be a time τ such that
+B(τ)=x for the first time. Let's define a new path B\*(u) obtained from
+B(u) by *reflection*:  
+![](graphs/brown13.png)
+
+Because of the symmetry of BM after hitting x the process is equally
+likely to follow the path of B and B\*, therefore
+
+  
+![](graphs/brown14.png)
+
+Let M(t) be the largest value attained by a BM up to time t. Then we
+have just shown that
+
+P(M(t)&gt;x) = 2[1-Φ(x/√t)]
+
+where Φ is the cdf f a standard normal rv.
+
+### First Hitting Time
+
+Let τ~x~ be the first time the BM path hits some x&gt;0
+starting at 0, or  
+![](graphs/brown15.png)  
+clearly we have
+
+τ~x~≤t iff M(t)≥x
+
+so
+
+P(τ~x~≤t) = P(M(t)≥x) = 2[1-Φ(x/√t)]
+
+and so  
+![](graphs/brown16.png)  
+
+### Zeros of Brownian Motion
+
+say B is a standard BM process with B(0)=0. We want to find the
+probability that B has at least one zero in the interval (t,t+s]. Let's
+denote this by ν(t,t+s)
+
+To start define
+
+H~t~(z,x) = P(τ~x~≤t|B(0)=z)
+
+so H~t~(z,x) is the probability that a standard BM starting at
+B(0)=z will reach the level x before time t. Above we found an integral
+for H~t~(0,x).
+
+Because of the symmetry and the spatial homogeneity of BM we have
+
+H~t~(0,x)=H~t~(x,0)=H~t~(-x,0)
+
+and so
+
+![](graphs/brown17.png)
+
+where the last equality follows from standard trigonometry.
+
+### Some other Properties of Brownian Motion
+
+1) BM will eventually hit any and every real value, no matter how large
+or how negative! It may be a million units above the axis, but it will
+(wp1) be back down again to 0, by some later time.  
+  
+2) Once BM hits zero (or any particular value), it immediately hits it
+again infinitely often, and then again from time to time in the future.
+
+3) Spatial Homogeneity: B(t) + x for any x $\in$  R is a
+BM started at x.
+
+4) Symmetry: -B(t) is a Brownian motion
+
+5) Scaling: √c•B(t/c) for any c &gt; 0 is a BM
+
+6) Time inversion:  
+![](graphs/brown2.png)  
+is a BM.
+
+7) BM is time reversible
+
+8) BM is self-similar (that is its paths are fractals). Brownian Motion
+is an example of a process that has a fractal dimension of 2. So in
+moving from a given location in space to any other, the path taken by
+the particle is almost certain to fill the whole space before it reaches
+the exact point that is the 'destination' (hence the fractal dimension
+of 2).

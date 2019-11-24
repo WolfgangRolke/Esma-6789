@@ -1,0 +1,614 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Standard Methods
+
+### Random Numbers
+
+
+Everything starts with generating X~1~, X~2~, .. iid
+U[0,1]. There are simply called random numbers. There are some ways to
+get these:
+
+• random number tables  
+• numbers taken from things like the exact (computer) time  
+• quantum random number generators  
+• ...
+
+Currently none of these are practically useful (and affordable)
+
+### Pseudo-Random Numbers
+
+
+These are numbers that look random, smell random ...
+
+Of course a computer can not do anything truly random, so all we can do
+is generate X~1~, X~2~, .. that appear to be iid
+U[0,1], so-called pseudo-random numbers.  
+Luckily, some people are really good at that!
+
+#### **Example** 
+
+A **linear congruential generator** works as follows: start
+with a **seed** X~0~, calculate  
+X~n+1~=(aX~n~+c) mod m  
+where a, b, c and m are chosen such that
+
+• c and m are relatively prime  
+• a-1 is divisible by all prime factors of m  
+• a-1 is a multiple of 4 if m is a multiple of 4
+
+A well known PRNG in *Numerical Recipes in C* uses a=1664525, b=0,
+c=1013904223 and m=2^32^
+
+Some computer programs (like R) have them already built in, most general
+computer languages (like C) do not. There are many excellent ones
+available on the Internet.
+
+Some issues to be aware of:
+
+All pseudo random number generators are cyclic, that is there is an N
+such that X~1~=X~N~, X~2~=X~N+1~
+etc. For any decent method we have N in the billions. For the one above
+N=m=2^32^
+
+All pseudo random number generators have a SEED, usually an integer. If
+you want to generate the same sequence you can do this by specifying
+this SEED.  
+in R if you want to generate the same sequence again then use the
+command set.seed(SEED) where SEED is an integer.
+
+There are often subtle differences between compilers so don't expect the
+same program to generate the same sequence on different computers.
+
+### Built in Routines
+
+
+As a statistics program R has routine built in to generate most standard
+rv's. They usually start with r and then the name of the distribution,
+for example **rnorm**
+
+### Generating Discrete Random Variables - The Inverse Transform Method
+
+Say we want to generate a random variable X from a distribution with density
+f(x~j~) = P(X=x~j~) = p~j~ , j=1,2,...  
+Here is a simple algorithm to do this:
+
+  
+Step 1: generate U~U[0,1], set j=1, p=p~1~  
+Step 2: if U&lt;p, set X=x~j~, **done**  
+Step 3: set j=j+1, p=p+p~j~, goto Step 2
+
+Why this works:  
+![](graphs/gen11.png)  
+Here we have p~1~ &lt; U &lt; p~1~ + p~2~, so
+we set X=x~2~
+
+Now P(X=x~2~) = P(p~1~ &lt; U &lt; p~1~ +
+p~2~) = p~2~
+
+Here is a very simple routine that implements this algorithm:
+
+```{r}
+gendisc <- function (n, x, p) {  
+  y = rep(0, n)  
+  m = length(x)  
+  cdf = cumsum(p)  
+  for (i in 1:n) {  
+    U = runif(1)  
+    for (j in 1:m) {  
+      if (U < cdf[j]) {  
+          y[i] = x[j]  
+          break  
+      }  
+    }  
+  }  
+  y  
+}  
+```
+
+#### **Example** 
+
+let's generate data from the following distribution:
+
+```{r}
+tbl <- source("tables/accrej.R")[[1]]
+kable.nice(tbl[[1]], do.row.names = FALSE)
+```
+
+```{r}
+x=1:10  
+p=c(1,2,10,4,30,22,10,1,1,19)/100  
+table(gendisc(10000, x, p))/10000
+```
+
+
+If the rv has an infinite sample space we first need to find a "maximal" value:
+
+#### **Example** 
+
+generate data from a Geom(0.1)
+
+Let's say we want to generate 10000 observations. Then we need x such
+that P(max{X~i~;i=1,..,10000)&gt;x)&lt;ε (say 10^-5^).
+So  
+![](graphs/gen113.png)
+
+and with ε=0.0001, n=10000 and p=0.1 we find x=197
+
+So
+
+```{r}
+x <- gendisc(10000,1:197, 0.1*0.9^(0:196))
+head(table(x))/10000
+```
+
+
+
+### The Accept-Reject Algorithm
+
+
+Suppose we have a method for generating a random variable having density
+{q~j~, j=1,2,..} and we want to generate r.v. from a
+distribution with density {p~j~, j=1,2,..}.We can do this by first
+simulating a r.v. Y from {q~j~} and then "accepting" this
+simulated value with probability proportional to
+p~Y~/q~Y~.  
+  
+Specifically, let c be a constant such that p~j~/q~j~
+≤ c for all j such that p~j~ &gt; 0. Then  
+  
+Step 1: generate Y from density {q~j~}  
+Step 2: generate U~U[0,1]  
+Step 3: If U &lt; p~Y~/(cq~Y~), set X = Y and stop.
+Otherwise go back to 1
+
+#### **Example** : 
+
+Say we want to generate a r.v X with values x in {1,3,5,7}
+and probabilities p=c(0.1,0.5,0.1,0.3). First we need a r.v. Y which is
+easy to generate and takes 4 values (not necessarily the same as in X
+though!). We can use for this the r.v. that chooses a number from 1 to 4
+at random, using the sample(1:4,1) command. This has density
+q=(1/4,1/4,1/4,1/4)., so  
+  
+p/q=(0.4,2,0.4,1.2)
+
+and if we set c=2 (=max{p/q}) we have
+
+p~j~/q~j~ ≤ c for all j.  
+  
+with this the accept-reject algorithm for this problem is implemented in
+
+```{r}
+accrej1 <- 
+function (n)
+{
+    x=c(1,3,5,7)
+    p=c(0.1,0.5,0.1,0.3)
+    z <- rep(0, n)
+    m <- length(x)
+    q <- rep(1/4, 4)
+    for (i in 1:n) {
+        for (j in 1:100) {
+            U <- runif(1)
+            Y <- sample(1:4, 1)
+            if (U < (p[Y]/(2 * q[Y]))) {
+                z[i] <- x[Y]
+                break
+            }
+        }
+    }
+    z
+}
+```
+
+
+Why this works: if our "candidate" r.v Y picks a value y which has a
+high probability in p, it will often be accepted and we get many of
+these. If on the other hand Y picks a value which has a low probability
+in p, it will rarely be accepted and we get only a few of those. The
+method is illustrated in 
+
+```{r}
+accrej.ill <- function (n) 
+{
+    x <- c(1, 3, 5, 7)
+    p <- c(0.1, 0.5, 0.1, 0.3)
+    q <- rep(1/4, 4)
+    X <- rep(0, n)
+    plot(c(0, 8), c(0, 1), type = "n", xlab = "x", ylab = "P/(cq)")
+    segments(x - 0.2, 2 * p, x + 0.2, 2 * p, lwd = 3)
+    for (i in 1:n) {
+        for (j in 1:100) {
+            Y <- sample(1:4, 1)
+            U <- runif(1)
+            if (U < p[Y]/(2 * q[Y])) {
+                X[i] <- x[Y]
+                points(x[Y], U, pch = "x")
+                break
+            }
+            else {
+                points(x[Y], U, pch = "o")
+            }
+        }
+    }
+    X
+}
+accrej.ill(10)
+```
+
+
+**Theorem**  
+The accept-reject algorithm generates a r.v. X such that
+P(X=x~j~) = p~j~.  
+In addition, the number of iterations of the algorithm needed until X is
+found is a geometric r.v. with mean c.
+
+**proof**  
+![](graphs/gen12.png)  
+Now each iteration is a Bernoulli trial with success probability 1/c,
+and successive trials are independent. Therefore the number of trials
+needed until the first success is a geometric r.v. with mean c. Also  
+
+![](graphs/gen13.png)
+
+#### **Example**: 
+
+say we want to generate r.v's X with
+P(X=x)=cxp^x^, x=1,2,.. First we need c:  
+![](graphs/gen114.png)
+
+Now what can we use as the reference distribution Y? We need a
+distribution with values on {1,2,..}, and an obvious choice is
+Y~Geom(r). Then  
+![](graphs/gen115.png)  
+How to choose r? Clearly we need p&lt;s&lt;1, otherwise
+p~x~/q~x~→∞ . How about s=(p+1)/2? Then r=1-(p+1)/2
+and
+
+p~x~/q~x~=
+[q^2^/r]x(2p/(p+1))^x-1^
+
+what is max{ p~x~/q~x~;x=1,2..}? let's use R to find
+out:
+
+p=0.5;q=1-p;x=1:20;plot(x,q^2/(1-(p+1)/2)\*x\*(2\*p/(p+1))^(x-1))
+
+and repeating this with different values of p shows that there is a
+unique maximum. We can find c by calculating p~x~/q~x~
+until
+
+p~x~/q~x~&gt;p~x+1~/q~x+1~  
+  
+find c as described above, set r=1-(p+1)/2 and then  
+
+generate Y~Geom(r)  
+generate U~U[0,1]  
+if U&lt;[q^2^/(rc)]Y(2p/(p+1))^Y-1^ set X=Y ,
+otherwise try again
+
+```{r}
+accrej.geom <- function (p)
+{
+    x=1:20
+    plot(x,(1-p)^2/(1-(p+1)/2)*x*(2*p/(p+1))^(x-1)) 
+    x=1
+    a1=(1-p)^2/(1-(p+1)/2)*x*(2*p/(p+1))^(x-1)
+    repeat {
+        x=x+1
+        a2=(1-p)^2/(1-(p+1)/2)*x*(2*p/(p+1))^(x-1)
+        if(a1>a2) {
+            cc=a1
+            break
+        }
+        a1=a2
+    }        
+    print(c(x-1,a1))
+    n=10000
+    x <- rep(0, n)
+    for (i in 1:n) {
+        repeat {
+            U <- runif(1)
+            Y <- rgeom(1,1-(p+1)/2)
+            if (U < (1-p)^2/(1-(p+1)/2)/cc*Y*(2*p/(p+1))^(Y-1)) {
+                x[i] <- Y
+                break
+            }
+        }
+    }
+    z=table(x)/n
+    x=as.numeric(names(z))
+    A=matrix(0,2,length(x))
+    dimnames(A)[[2]]=x
+    A[1,]=z
+    A[2,]=(1-p)^2*x*p^(x-1)
+    round(A,4)
+}
+accrej.geom(0.3)
+```
+
+
+### Continuous Distributions
+
+This is very similar (actually the same) as the method for discrete r.v.
+Assume want to generate a r.v. X with density f. We have a way to
+generate a r.v. Y with density g. Let c be a constant such that
+f(x)/g(x)≤ c for all x. Then the accept-reject algorithm is as
+follows:  
+Step 1: generate Y from pdf g  
+Step 2: generate U~U[0,1]  
+Step 3: If U &lt; f(Y)/(cg(Y)), set X = Y and stop. Otherwise go back to
+1
+
+We have the same theorem as for the discrete case:  
+**Theorem**  
+The accept-reject algorithm generates a r.v. X with density f.  
+In addition, the number of iterations of the algorithm needed until X is
+found is a geometric r.v. with mean c.
+
+**proof** same as above.
+
+Note: we do have to be careful because of course g(x) can be 0. This is
+ok as long as f(x) is 0 as well but not if f(x)&gt;0. Basically we need
+Y to live on the same set as X. (We say X and Y have the same support)
+
+#### **Example** 
+
+generate a r.v. X with density f(x)=6x(1-x) 0&lt;x&lt;1.  
+Here we can use Y~U[0,1], with g(x) = 1. Let's find max{f(x)/g(x) |
+0&lt;x&lt;1}. Taking derivatives we find d/dx {6x(1-x)} = 6-12x = 0,
+x=1/2. This is a maximum (?) so we have max{f(x)/g(x) | 0&lt;x&lt;1} =
+f(1/2) = 3/2 = c  
+Note: f(x)/(cg(x)) = 6x(1-x)/(3/2\*1) = 4x(1-x)  
+The routine is implemented in 
+
+```{r}
+accrej3 <- function (n, findc = F, Show = F) 
+{
+    if (findc) {
+        x <- seq(0, 1, length = 100)
+        plot(x, 6 * x * (1 - x), type = "l")
+        return(max(6 * x * (1 - x)))
+    }
+    X <- rep(0, n)
+    for (i in 1:n) {
+        for (j in 1:100) {
+            Y <- runif(1)
+            if (runif(1) <= 4 * Y * (1 - Y)) {
+                X[i] <- Y
+                break
+            }
+        }
+    }
+    if (Show) {
+        hist(X, probability = T)
+        x <- seq(0, 1, length = 100)
+        lines(x, 6 * x * (1 - x))
+    }
+    X
+}
+hist(accrej3(1e4), 50, freq=FALSE,
+     main="", xlab="", ylab="")
+curve(6*x*(1-x), 0, 1, lwd=2, col="blue", add=TRUE)
+```
+
+
+why the accept-reject algorithm works is illustrated on this Example in
+**accrej1.ill**
+
+```{r}
+accrej1.ill <- function (n) 
+{
+    f <- function(x) {
+        6 * x * (1 - x)
+    }
+    g <- function(x) {
+        1
+    }
+    c <- 3/2
+    x <- seq(0, 1, length = 100)
+    plot(x, f(x)/(c * g(x)), xlab = "x", ylab = "f/(cg)", type = "l", 
+        xlim = c(0, 1), ylim = c(0, 1))
+    for(i in 1:n) {
+      Y <- runif(1)
+      U <- runif(1)
+      if (U <= f(Y)/(c * g(Y))) {
+        points(Y, U, pch = "X", col = 3)
+      }
+      else {
+        points(Y, U, pch = "0", col = 2)
+      }
+    }
+}
+accrej1.ill(20)
+```
+
+
+#### **Example** 
+
+generate a r.v. X ~ G(3/2, 1)  
+
+Now f(x)&gt;0 for x&gt;0, so we need a Y that "lives" on (0, ∞) and that
+we already know how to generate, for example an exponential r.v.
+
+  
+What value of λ should we use? Note that EX = 3/2, EY = λ, so maybe
+λ=3/2 is a good idea.  
+with this we need to find c. Again we will try to find max{f(x)/g(x)}.
+We have  
+![](graphs/gen15.png)  
+and so  
+![](graphs/gen16.png)  
+
+Above we picked λ=3/2 because this matched up the means of X and Y, a
+reasonable choice. But is it an optimal choice? Let's see. Optimal here
+means a choice of λ that minimizes c. Now if we repeat the above
+calculation with λ instead of 3/2 we find  
+![](graphs/gen111.png)  
+This is the minimum (?) and so our choice was in fact optimal.
+
+### Generating Random Vectors
+
+
+The Accept-Reject algorithm can be used here as well:
+
+#### **Example** 
+
+generate rv from the joint density f(x,y)=6x, 0≤x&lt;y≤1, 0
+otherwise.
+
+(X,Y) takes values in [0,1]x[0,1], so our proposal rv has to do the
+same. Let's use (U~1~,U~2~) uniform on
+[0,1]x[0,1]. Then
+
+c = max{f(x,y)/g(x,y)} =max{6x;0&lt;x,y&lt;1} =6, so
+f(x,y)/[cg(x,y)]=x if x&lt;y, 0 otherwise
+
+and so the algorithm is
+
+Step 1: generate (U~1~,U~2~) from U[0,1]  
+Step 2: generate U~U[0,1]  
+Step 3: If U &lt; U~1~&lt;U~2~ set (X,Y) =
+(U~1~,U~2~) and stop. Otherwise go back to 1
+
+How can we verify that this actually generates the correct data? Here is
+one check. recall
+
+f~X~(x)=6x(1-x) 0&lt;x&lt;1
+
+f~Y~(y)=3y^2^ 0&lt;y&lt;1
+
+**accrej6** generates the data, draws the histogram of X and Y and adds
+the curves.
+
+```{r}
+accrej.vec <- function (which=1,n=1000)
+{
+    par(mfrow=c(2,2))
+    x <- matrix(0, n,2)
+    if(which==1) {
+      for (i in 1:n) {
+        repeat {
+            U <- runif(3)
+            if (U[1] < U[2]& U[2]<U[3]) {
+                x[i,] <- U[2:3]
+                break
+            }
+        }
+      }
+    }  
+    else {
+          x[,2]=rbeta(n,3,1)
+          x[,1]=x[,2]*rbeta(n,2,1)
+    }      
+    plot(x)
+    z=seq(0,1,length=200)
+    hist(x[,1],breaks=100,freq=F)
+    lines(z,6*z*(1-z),lwd=2)
+    hist(x[,2],breaks=100,freq=F)
+    lines(z,3*z^2,lwd=2)
+ 
+}
+accrej.vec()
+```
+
+
+### Generating Stochastic Processes
+
+There is not much new here. In general stochastic processes have to be
+generated "one step at a time", because often X~n+1~ depends on
+X~n~.
+
+#### **Example** 
+
+Consider a Markov Chain {X~n~,n≥0} with state space
+S={1,2,3} and transition matrix  
+  
+![](graphs/hw90.png)
+
+Use simulation to verify that the stationary distribution is
+π^T^=(q/2,1/2,p/2)
+
+```{r}
+mc1 <- function (p, B=10000) 
+{
+      finalstate=rep(0,B)
+      n=sample(c(21:30),size=B,replace=T)
+      for(i in 1:B) {
+          x=0
+          for(j in 2:n[i]) {
+              if(x==1) x=sample(c(0,2),size=1,prob=c(1-p,p))
+              else x=1
+          }    
+          finalstate[i]=x
+      }    
+      print(finalstate[1:10])
+      print("pi - Simulation")
+      print(table(finalstate)/B)
+      print("pi - True")      
+      c(1-p,1,p)/2
+}
+mc1(0.2)
+```
+
+
+Note: because the chain is periodic we need to check the final states at a random time.
+
+#### **Example** 
+
+Consider the following: process: it starts at 0 at time 0,
+stays for an exponential time with rate 1, then jumps to 1, stays for an
+exponential time with rate 1, then jumps to 2 and so on. In homework 9
+we showed that
+
+P(t)~0n~ = t^n^e^-t^/n!
+
+write a simulation that verifies this.
+
+Generating a realization of this process is easy:
+
+x=cumsum(rexp(n,1))
+
+Now we need to check where the process is at time t.
+
+length(x[x&lt;t])
+
+will tell us
+
+**mc2** checks all "reasonable" values of n for a fixed t.
+
+```{r}
+ mc2 <- function (t,B=10000) 
+{
+      n=round(2*t)
+      counter=rep(0,n)
+      for(i in 1:B) {
+          x=cumsum(rexp(3*round(t),1))
+          for(j in 1:n) {
+              if(length(x[x<t])==j) counter[j]=counter[j]+1
+          }    
+      }    
+      cbind(counter/B,t^c(1:n)*exp(-t)/factorial(c(1:n)))
+ }
+mc2(2)
+```
+

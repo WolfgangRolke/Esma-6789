@@ -1,0 +1,488 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Examples for Markov Chains
+
+
+### Umbrellas
+
+Say you own r umbrellas, which are either at home or in your office. In
+the morning if it rains you take an umbrella, if there is one at home,
+equally in the evening in the office. Say it rains in the morning or in
+the evening independently with probability p. Analyze this as a Markov
+chain and find the transition matrix.
+
+We are going to present two different solutions, that is two transition
+matrices which both describe this process:
+
+**Solution 1**: Say X~n~ is the number of umbrellas at home in
+the morning of the n^th^ day, then
+X~n~$\in$ {0,1,..,r}. Now
+
+P(X~n~=i|X~n-1~=i) = P(it is raining in the morning
+and evening or it is not raining in the morning and evening) =
+p^2^+q^2^, 1≤i≤r
+
+P(X~n~=i-1|X~n-1~=i) = P(it is raining in the morning
+but not in the evening) = pq, 1≤i≤r
+
+P(X~n~=i+1|X~n-1~=i) = P(it is not raining in the
+morning but it is raining in the evening) = qp, 1≤i≤r-1
+
+P(X~n~=0|X~n-1~=0) = P(it is not raining in the
+evening) = q
+
+P(X~n~=1|X~n-1~=0) = P(it is raining in the evening) =
+p
+
+P(X~n~=r|X~n-1~=r) = P(it is not raining in the
+morning or it is raining both times) = q+p^2^
+
+so  
+![](graphs/mark126.png)
+
+**Solution 2:** Say X~n~ is the number of umbrellas at your
+present location (home or work), then
+X~n~$\in$ {0,1,..,r}. Now
+
+P(X~n~=r|X~n-1~=0) = P(no umbrellas where you were
+last) = 1
+
+P(X~n~=r-i|X~n-1~=i) = P(it is not raining) = q, 1≤i≤r
+
+P(X~n~=r-i+1|X~n-1~=i) = P(it is raining) = p, 1≤i≤r  
+  
+![](graphs/mark127.png)  
+
+Let's find the n-step transition matrix in the case r=2. Using solution
+2 we have  
+  
+![](graphs/mark129.png)  
+For the eigenvectors we have  
+![](graphs/mark130.png)  
+and in this generality that's about it.
+
+Finally we find the stationary distributions. For solution 1 the system
+of equations is  
+![](graphs/mark132.png)  
+and so on shows x=c(q,1,..,1) solves the system. Now q+1+..+1=q+r, so
+the stationary distribution is π~0~=q/(q+r),
+π~i~=1/(q+r) i=1,..,r
+
+For solution 2 we have  
+![](graphs/mark133.png)  
+and we see that we get the same stationary distribution as in solution
+1.
+
+So, what percentage of times do you get wet?
+
+Clearly this is P(no umbrella and it rains) =
+qπ~0~=q^2^/(q+r)  
+
+### The Gambler's Ruin Problem
+
+
+Suppose you go to the casino and repeatedly play a game where you win
+and double your "bet" with probability p and loose with probability
+q=1-p. For example, if you play roulette and always place your bet on
+"red" we have p=18/38.  
+Suppose you go in with the following plan: you have $i to start, you
+always bet $1 in each round and you stay until you either lost all your
+money or until you have reached $N. What is the probability of reaching
+$N before going broke?
+
+If we let X~n~ denote your "fortune" after n rounds
+{X~n~} is a Markov chain on {0,1,..,N} with transition
+probabilities  
+p~00~=p~NN~=1  
+p~i,i+1~=p and p~i,i-1~=q for i in {1,..,N-1}  
+Also we X~0~=i
+
+Let P~i~ denote the probability that, starting at i the fortune
+will eventually reach N. We have:  
+![](graphs/mark114.png)
+
+  
+Note that P~N~=1 and that the formula above also holds for i=N,
+so we have  
+  
+![](graphs/mark115.png)
+
+The main "trick" in this calculation was to condition on the "right"
+event (here X~1~). This is often the case when doing math with
+Markov chains.
+
+```{r echo=FALSE}
+gambler <-
+function (which = 1, i = 100, N = 130, p = 18/38) 
+{
+    r <- (1 - p)/p
+    if (which == 1) {
+        N <- (i + 1):N
+        if (p == 0.5) {
+            Pi <- i/N
+        }
+        else {
+            Pi <- (1 - r^i)/(1 - r^N)
+        }
+        plot(N, Pi, ylim = c(0, 1))
+
+    }
+    if (which == 2) {
+        i <- c(100, 200)
+        N <- c(110, 220)
+        if (p == 0.5) 
+            return(i/N)
+        p <- (1 - r^i)/(1 - r^N)
+        cat("100 to 110:", round(p[1],3),"\n")
+        cat("200 to 220:", round(p[2],3))
+
+    }
+    if (which == 3) {
+        i <- 20
+        N <- 40
+        B <- 2000
+        maxrun <- 5000
+        m <- rep(0, B)
+        for (k in 1:B) {
+            X <- i + cumsum(2 * rbinom(maxrun, 1, p) - 1)
+            if (min(X) > 0 && max(X) < N) {
+                m[k] <- maxrun
+            }
+            else {
+                m[k] <- min(c(c(1:maxrun)[X <= 0], c(1:maxrun)[X >= 
+                  N]))
+            }
+        }
+        hist(m, breaks = 50, main="")
+        out <- round(c(mean(m), median(m), range(m)),1)
+        names(out) <- c("Mean", "Median", "Low", "High")
+        return(out)
+    }
+    
+}
+
+```
+
+
+Say in our example playing roulette you start with $100. Here is the probability of reaching N before going broke.
+
+```{r echo=FALSE}
+gambler(1)
+```
+
+
+Is it the same probability to start with $100 and reach $110 or to start
+with $200 and reach $220? The answer is no, we find instead
+
+```{r echo=FALSE}
+gambler(2)
+```
+
+When I go the Casino I don't expect to win money. I go for the
+entertainment of gambling. For me a successful evening is when I don't
+loose my money to fast, that is I want to maximize the time I spend in
+the Casino. So how much time can I expect to spend in the Casino if I
+start with $100 and I will leave if I either win $100 or if I go broke?
+Here is the result of a simulation to estimate
+the mean time until I have to leave. 
+
+
+```{r echo=FALSE}
+gambler(3, p=0.5)
+```
+
+
+### An Application to Runs
+
+```{r echo=FALSE}
+runs <- function (which=1, x0) {
+  if(which==1) {
+    B=1000
+    L=rep(0,10)
+    for(j in 1:B) {
+      x=c(x0,runif(10))
+      m=min(c(1:19)[diff(x)<0])
+      L[m]=L[m]+1
+    }
+    print("")
+    m=c(1:10)
+    density=as.numeric((1-x0)^(m-1)/factorial(m-1)-(1-x0)^m/factorial(m))
+    a=round(rbind(density,L/B),3)
+    dimnames(a)=list(c("density","Sim"),m)
+    print(a)
+    print("")
+    print(c(x0,exp(1-x0),sum(c(1:10)*L)/B))
+  }
+  if(which==2) {
+B=5000
+y=rep(0,B)
+for(j in 1:B) {
+x=c(x0,runif(10))
+m=min(c(1:10)[diff(x)<0])
+y[j]=x[m+1]
+}
+hist(y,breaks=250,freq=F,main="p(y|x)")
+x=seq(0,1,length=1000)
+y=ifelse(x<x0,exp(1-x0),exp(1-x0)-exp(x-x0))
+lines(x,y,lwd=2)
+}
+if(which==3) {
+u=runif(10000)
+z=c(0,ifelse(diff(u)<0,1,0))
+y=u[z==1]
+hist(y,breaks=100,freq=F)
+abline(2,-2,lwd=2)
+}
+if(which==4) {
+B=100000
+x=runif(B)
+L=rep(0,10)
+n=0
+m=1
+for(i in 2:B) {
+if(x[i]>x[i-1]) m=m+1
+else {L[m]=L[m]+1;m=1;n=n+1}
+}
+print("")
+names(L)=1:10
+print(L/B)
+return(sum(c(1:10)*L)/n)
+}
+
+}
+```
+
+
+Consider a sequence of numbers x~1~, x~2~, ... and
+define a **run** as any increasing sequence. For example say the
+sequence is
+
+0.83 0.64 0.20 0.02 0.81 0.26 0.26 0.35 0.23 0.25
+
+then the runs are
+
+0.83  
+0.64  
+0.20  
+0.02 0.81  
+0.26 0.27 0.35  
+0.23 0.25
+
+so we have 3 runs of length 1, 2 runs of length 2 and 1 run of length 3
+
+Now say X~i~~U[0,1] independent and we are interested in the
+distribution of the length of the runs. For example, if L~1~ is
+the length of the first run, then
+
+P(L~1~≥m) = P(first m numbers are in increasing order) = 1/m!,
+m=1,2,..
+
+Also, assume that for any later run L its first value is x, then all
+values of this run have to be in the interval (x,1) and so
+
+P(L≥m|x) = (1-x)^m-1^/(m-1)!, m=1,2,..
+
+Let's do a quick check of this formula. Clearly we have
+
+P(L=1|x) = P(X~2~&lt;x) = x
+
+and our formula gives
+
+P(L=1|x) = P(L≥1|x)-P(L≥2|x) =
+(1-x)^1-1^/(1-1)!-(1-x)^2-1^/(2-1)! = 1-(1-x) = x
+
+Below we have the routine "runs", which simulates this "game".
+**runs(1,0.5)** verifies the probabilities above for x=0.5.
+
+```{r}
+runs(1, 0.5)
+```
+
+
+Now let I~n~ be the first value of the n^th^ run. For
+example say we have the sequence
+
+0.83  
+0.64  
+0.20  
+0.02 0.81  
+0.26 0.27 0.35  
+0.23 0.25
+
+then I={0.83, 0.64, 0.20, 0.02, 0.26, 0.23}
+
+Now {I~n~,n≥1} is a Markov chain with the continuous state
+space [0,1].
+
+Let us find p(y|x), the probability density that the next run begins at
+y if the last one began at x. Now  
+![](graphs/mark146.png)  
+Now the length of the run is m and the next run will start at y if
+
+i) the next m-1 values are increasing and all greater than x  
+ii) the m^th^ value is y  
+iii) the largest of the m-1 values is greater than y
+
+This is illustrated here  
+![](graphs/mark147.png)  
+so now  
+![](graphs/mark148.png)
+
+**runs(2,0.5)** verifies the calculation
+
+```{r}
+runs(2, 0.5)
+```
+
+  
+What is the stationary distribution of this chain? First we need a
+continuous state space analog of the formula for a stationary
+distribution, which is  
+![](graphs/mark149.png)  
+solving such an integral equation analytically is very difficult. So
+let's make a guess what the stationary distribution is, and then verify
+that. Now I~1~ being the initial value of the run is U[0,1].
+However, the later runs begin whenever a value smaller than the previous
+one occurs. So it seems likely that the long-run proportion of such
+values that are less than y would equal the probability that a U[0,1]
+rv is less than y given that it is smaller than a second independent
+U[0,1].
+
+Now  
+![](graphs/mark150.png)
+
+Another way to try and guess what the stationary distribution might be
+is to use simulation. This is done in **runs(3)**, where it is fairly
+easy to see that should be a linear function, which of course has to be
+π(y)=2(1-y)
+
+```{r}
+runs(3)
+```
+
+  
+Now we verify  
+![](graphs/mark151.png)  
+so now the limiting distribution of the length of the n^th^ run
+is given by  
+![](graphs/mark152.png)
+
+a curious identity!
+
+the R command
+
+```{r}
+cumsum(1/(2:11)/factorial(0:9))
+```
+
+
+shows that this identity is indeed true.
+
+Finally **runs(4)** verifies the expected value
+
+```{r}
+runs(4)
+```
+
+
+  
+
+### The On-Off Process
+
+
+Here X~n~ takes only two possible states, coded as 0 ("Off")
+and 1 ("On"). Therefore the transition matrix is given by
+
+![](graphs/mark135.png)  
+Now  
+![](graphs/mark136.png)  
+For the stationary distribution we find  
+![](graphs/mark137.png)  
+Finally  
+![](graphs/mark138.png)
+
+### The Hardy-Weinberg Law
+
+
+let's consider the following simple case in genetics: there are two type
+of genes, A and a. Each individual carries a pair of these, AA, Aa or
+aa. Assume that the proportion of individuals in the population with AA
+is p~0~, aa q~0~ and Aa r~0~. When two
+individuals mate their offspring gets one gene each from their parents
+at random. So for example
+
+P(offspring is AA | parents are AA and AA) = 1  
+P(offspring is Aa | parents are AA and AA) = 0  
+P(offspring is Aa | parents are AA and Aa) = 1/2 (A from parent 1 with
+probability 1, a from parent 2 with probability 1/2)
+
+We also assume that parents don't choose to mate based on their genes.
+
+What will the proportions be in the next generation? let's call these p,
+q and r.
+
+First we have
+
+P(A) = P(A|AA)p~0~+P(A|aa)q~0~+P(A|Aa)r~0~ =
+p~0~+r~0~/2
+
+and also
+
+P(a) = q~0~+r~0~/2
+
+and so
+
+p = P(AA) = P(A)P(A) = (p~0~+r~0~/2)^2^
+
+q = P(aa) = P(a)P(a) = (q~0~+r~0~/2)^2^
+
+r = 2P(A)P(a) = 2 (p~0~+r~0~/2)
+(q~0~+r~0~/2)
+
+and so
+
+p+r/2 =
+
+(p~0~+r~0~/2)^2^+
+(p~0~+r~0~/2) (q~0~+r~0~/2) =
+
+(p~0~+r~0~/2)[p~0~+r~0~/2+q~0~+r~0~/2]=
+
+p~0~+r~0~/2 = P(A)
+
+So the proportions stay the same from generation to generation!
+
+This is known as the [Hardy-Weinberg
+law](http://en.wikipedia.org/wiki/Hardy%E2%80%93Weinberg_principle)
+
+Let us follow the genetic history of an individual from generation to
+generation. Let's assume that the population has stabilized at the
+proportions p,q and r. So, for a given individual, let X~n~ be
+the genetic state of her n^th^ offspring. then
+{X~n~,n≥0} is a Markov chain. Now  
+![](graphs/mark159.png)  
+and in the same way we can find the transition matrix  
+![](graphs/mark160.png)
+
+Clearly one would expect that the limiting probabilities for the
+individual are just the long-run proportions. Let's verify this  
+![](graphs/mark161.png)

@@ -1,0 +1,418 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## MCMC - Markov Chain Monte Carlo
+
+The starting point of this section is the result that if the Markov
+chain {X~n~} is irreducible and ergodic, then  
+![](graphs/mark110.png)  
+The idea is to use this as follows: say I want to generate data from a
+distribution π. Now if I can find an irreducible and ergodic Markov
+chain {X~n~} which has π as its stationary measure, we can
+generate observations from {X~n~}, wait a while until its
+limiting distribution is reached (?) and then take the {X~n~}
+as if they came from π.  
+
+### The Metropolis-Hastings Algorithm
+
+
+Let's say we want to generate observations from a distribution π on
+1,..,m. Let Q be the transition probability matrix of an irreducible
+Markov chain on 1,..,m. Define the Markov chain {X~n~} as
+follows: When X~n~=i a r.v. X such that P(X=j)=q~ij~
+is generated. (This of course means we need to know how to generate
+observations from Q). If X=j, then set X~n+1~=j with
+probability α~ij~ and equal to i with probability
+1-α~ij~. Now X~n~ is a Markov chain with transition
+probabilities given by:  
+![](graphs/mcmc1.png)
+
+Now this Markov chain will be time-reversible and have stationary
+measure π if  
+  
+π~i~P~ij~=π~j~P~ji~ for all j≠i  
+  
+This is equivalent to  
+  
+π~i~q~ij~α~ij~=π~j~q~ji~α~ji~  
+  
+and is easy to check that this will be satisfied if we set  
+![](graphs/mcmc2.png)
+
+One of the reasons this algorithm is so useful is the following: say we
+only know the values in π up to a constant, that is we have a sequence
+{b~j~,j=1,..m}, b~j~≥0 and ∑b~j~=B. We want
+to generate observations from π with π~j~=b~j~/B. Then
+the above algorithm works without the need to find B because  
+![](graphs/mcmc3.png)  
+This is great because for example if we want to generate data from a
+posterior distribution B is the integral over the marginal distribution,
+which might be very difficult to find.
+
+With this we get the Metropolis-Hastings Algorithm:  
+  
+1) Choose an irreducible Markov chain with transition probabilities Q
+and choose some integer k between 1 and m  
+2) Let n=0 and X~0~=k  
+3) generate a r.v. X such that P(X=j)=q~x~0~j~ and
+generate U~U[0,1]  
+4) If U &lt;
+b~X~q~X,X~n~~/b~X~n~~q~X~n~,X~
+then NS=X, else NS=X~n~  
+5) n=n+1, X~n~=NS  
+6) Go to 3
+
+Notice the similarities between this algorithm and the accept-reject
+method. The main differences, and the reason this algorithm is so
+useful, are that here we don't need to find c, which usually requires a
+maximization and we don't need B, as discussed above. The downside is
+that we need to generate X's until the chain has reached its stationary
+distribution.
+
+Notice another nice thing about this algorithm: we get a new observation
+in each step (either X or X~n~) whereas in the accept-reject
+method we might need to generate several random variables before
+accepting one.
+
+#### **Example** 
+
+Let's start with a very simple example: X~Geom(p).
+
+How do we find an irreducible Markov chain with transition probabilities
+Q? Here is a very simple one: if the last observation was x we choose Y
+at random from x-1, x or x +1. (This type of chain "pick a point close
+to the last one at random" is often called a random walk proposal and is
+quite popular) With this we find  
+![](graphs/mcmc21.png)
+
+and the algorithm becomes:
+
+1) x~0~=1
+
+2) for i=2,..n
+
+generate U~U[0,1] and
+Y~U{x~i-1~-1,x~i-1~,x~i-1~+1}
+
+if U&lt;(1-p)^(y-x~i-1~) x~i~=y otherwise
+x~i~=x~i-1~
+
+here is the R routine:
+
+```{r}
+mcmc.geom <-  function (p=0.5, nb=1000 ,n=10000)  {  
+  par(mfrow=c(1,1))  
+  x=rep(0,n+nb)  
+  for(i in 2:(n+nb)) {  
+    y=sample(c(-1,0,1), size=1)+x[i-1]  
+    if(y<1) {x[i]=x[i-1]; next}  
+    if(runif(1)<(1-p)^(y-x[i-1])) x[i]=y  
+    else x[i]=x[i-1]  
+  }  
+  plot(cumsum(x)/1:(n+nb), type="l")  
+  x=table(x[(nb+1):(nb+n)])  
+  z=as.numeric(names(x))  
+  rbind(x/n, p*(1-p)^(z-1))  
+}  
+mcmc.geom()
+```
+
+How about the time needed until the stationary distribution is reached?
+This is called the "burn-in" period.
+
+
+One way to check this is to graph the means of the observations vs their index
+
+
+#### **Example** 
+
+Let's say we want to generate X~N(μ,σ). We try two
+proposals, both "Random Walk" types:
+
+a) U[x-ε,x+ε] for some ε&gt;0.  
+b) N(x,ε) for some ε&gt;0.
+
+For a) we have
+
+q~xy~=1 if x-ε&lt;y&lt;x+ε, 0 otherwise,
+
+(actually q=1/(2ε) but constants don't matter!) and for b) we get
+
+q~xy~=dnorm(y,x,ε)
+
+So the algorithm uses:  
+  
+1a) X=runif(1,X~n~-ε,X~n~+ε])  
+1b) X=rnorm(1,X~n~,ε)
+
+2a)
+b~X~q~X,X~n~~/b~X~n~~q~X~n~,X~
+= dnorm(X,μ,σ)/dnorm(X~n~,μ,σ)  
+2b)
+b~X~q~X,X~n~~/b~X~n~~q~X~n~,X~
+=
+dnorm(X,μ,σ)dnorm(X~n~,X,ε)/(dnorm(X~n~,μ,σ)dnorm(X,X~n~,ε))
+
+This is implemented in **mcmc2**.  
+  
+```{r}
+ mcmc.norm <- function (method = 1, n = 10000, eps = 1, mu = 0, sig = 1) 
+{
+    Xn <- rep(0, n)
+    for (i in 2:n) {
+        U <- runif(1)
+        Accept <- F
+        if (method == 1) {
+            X <- runif(1, Xn[i - 1] - eps, Xn[i - 1] + eps)
+            if (U < dnorm(X, mu, sig)/dnorm(Xn[i - 1], mu, sig)) 
+                Accept <- T
+        }
+        if (method == 2) {
+            X <- rnorm(1, Xn[i - 1], eps)
+            if (U < dnorm(X, mu, sig) * dnorm(Xn[i - 1], X, eps)/dnorm(Xn[i - 
+                1], mu, sig)/dnorm(X, Xn[i - 1], eps)) 
+                Accept <- T
+        }
+        if (Accept) {
+            NS <- X
+        }
+        else {
+            NS <- Xn[i - 1]
+        }
+        Xn[i] <- NS
+    }
+    par(mfrow = c(1, 2))
+    plot(1:n, cumsum(Xn)/1:length(Xn), type = "l")
+    hist(Xn[5000:10000], breaks = 100, 
+         freq=FALSE, main = "")
+    x <- seq(mu - 3 * sig, mu + 3 * sig, length = 100)
+    lines(x, dnorm(x, mu, sig))
+ 
+ }
+mcmc.norm(1, mu=0, sig=1, eps = 0.1)
+mcmc.norm(2, mu=0, sig=1, eps = 0.1)
+mcmc.norm(1, mu=20, sig=3, eps = 1)
+mcmc.norm(2, mu=20, sig=3, eps = 1)
+```
+
+
+Compare this algorithm, and its implementation, with the accept-reject
+algorithm. Here we needed practically no calculations at all.
+
+The are two main difficulties with the MCMC method in practice:
+
+  
+1) It can take a lot of computational effort, for example if we want to
+generate just 1 variate at a time we still might have to generate 10000
+others before the stationary distribution is reached.
+
+  
+2) It can be very difficult in practice to know when the stationary
+distribution is reached, that is when the "burn-in" period is over.
+There are examples where the chain seems to have settled down for very
+long periods but is not actually at the stationary distribution yet.
+
+#### **Example** 
+
+Generate data from (X,Y) with a density uniform on  
+![](graphs/mcmc9.png)  
+for some 0&lt;t&lt;1.
+
+The lower line has points (0,0) and (1,t), so m=1/t and x=y/t, the upper
+line has points (0,0) and (t,1), so m=t and x=ty. Say we want to use the
+accept-reject algorithm, then we first need the area. Let's add a few
+lines which divide it into several right triangles:
+
+![](graphs/mcmc22.png)
+
+Now  
+![](graphs/mcmc10.png)  
+Now if we use (U,V)~U[0,1]^2^ as the proposal distribution we
+find  
+![](graphs/mcmc11.png)  
+so in this case the accept-reject algorithm is just generating uniforms
+on [0,1]^2^ and taking those points in the area.
+
+How can we tell that we generated the right data? Some "checks" are: a
+scatterplot or finding and plotting the marginals:  
+![](graphs/mcmc12.png)  
+This is done in
+
+```{r}
+rtriangle <-   function (which = 1, 
+                         t = 0.8, n = 5000, eps = 0.2)  {  
+  par(mfrow = c(2, 2))  
+  x = matrix(0, n, 2)  
+  counter = 0  
+  if (which == 1) {  
+   for (i in 1:n) {  
+    repeat {  
+      counter = counter + 1  
+      U = runif(1)  
+      V = runif(1)  
+      if (t*V < U & U < V/t) {  
+        x[i, ] = c(U, V)  
+        break  
+      }  
+    }  
+   }  
+   x = x[1:n, ]  
+  }  
+  if (which == 2) {  
+   NS = rep(0, 2)  
+   x[1, ] = c(t, t)/2  
+   for (i in 2:n) {  
+      counter = counter + 1  
+      NS = x[i - 1, ] + runif(2, -eps, eps)  
+      if (t*NS[2]<NS[1] & NS[1]<NS[2]/t & 
+          NS[1]>0 & NS[1]<1 & NS[2]>0 & NS[2]<1) {  
+        x[i, ] = NS  
+      }  
+      else {  
+        x[i, ] = x[i - 1, ]  
+      }  
+  }  
+  plot(1:n, cumsum(x[, 1])/1:n, 
+       type = "l", ylim = c(0,  1))  
+  lines(1:n, cumsum(x[, 2])/1:n, type = "l")  
+  x = x[-(1:1000), ]  
+  }  
+  print("Mean number of iterations until we accept:")  
+  print(round(counter/n, 2))  
+  plot(x, xlab = "X1", ylab = "x2")  
+  segments(0, 0, 1, t, lwd = 2)  
+  segments(0, 0, t, 1, lwd = 2)  
+  segments(t, 1, 1, 1, lwd = 2)  
+  segments(1, 1, 1, t, lwd = 2)  
+  z = seq(0, 1, length = 100)  
+  hist(x[, 1], breaks = 50, freq = FALSE, 
+       xlab = "x1")  
+  lines(z, ifelse(z<t, (1+t)/t*z, (1 - t * z)/(1 - t)))  
+  hist(x[, 2], breaks = 50, freq = FALSE, xlab = "x2")  
+  lines(z, ifelse(z<t, (1 + t)/t*z, (1 - t*z)/(1 - t)))  
+  
+}
+rtriangle(1)
+```
+
+Now how about MCMC? Let's generate a proposal rv as follows
+X=X~n~+U[-ε,ε]^2^. Notice now we don't need the
+area, we can just say f(x,y)=B if 0&lt;x,y&lt;1 , ty&lt;x&lt;y/t. So
+
+b~X~q~X,X~n~~/b~X~n~~q~X~n~,X~
+= q~X,X~n~~/q~X~n~,X~ = 1 iff X is
+in the area, so we set X~n+1~ =X is X is in the area,
+X~n+1~=X~n~ otherwise. This is done in
+
+```{r}
+rtriangle(2)
+```
+
+### The Gibbs Sampler
+
+
+Let's begin with a two-stage Gibbs sampler: Say we want to generate data
+from a bivariate rv (X,Y) with joint pdf (density) f(x,y) We know the
+marginals of f and can generate variates from them. Then the Gibbs
+sampler works by iteratively generating observations from the
+conditional distributions
+
+1) pick initial values X ^(0)^=x^(0)^ and
+Y^(0)^=y^(0)^.  
+2) X^(k)^ ~ f~X|Y=y~(x|y^(k-1)^)  
+3) Y ^(k)^ ~ f~Y|X=x~(y|x^(k)^)  
+4) goto 2
+
+#### **Example** 
+
+say we want to generate variates from a bivariate normal
+(X,Y) with means 0, standard deviations 1 and correlation ρ. Then we
+have
+
+X~n+1~|Y=y~n~~N(ρy~n~,√(1-ρ^2^))  
+Y~n+1~|X=x~n+1~~N(ρx~n+1~,√(1-ρ^2^))
+
+This is done in **gibbs1()**. It is hard to imagine a much shorter
+program to generate this data!
+
+```{r}
+gibbs.norm <- function (rho = 0, n = 10000) {
+    XY = matrix(0, n, 2)
+    for (i in 2:n) {
+        XY[i, 1] = rnorm(1, rho * XY[i - 1, 2], sqrt(1 - rho^2))
+        XY[i, 2] = rnorm(1, rho * XY[i, 1], sqrt(1 - rho^2))
+    }
+    print(cor(XY))
+    par(mfrow = c(1, 1))
+    plot(XY, xlab = "X", ylab = "Y", pch = ".")
+}
+gibbs.norm()
+```
+#### **Example** 
+
+Say we have X~Bin(n,p) and p~Beta(α,β) and and we want to
+know E[X] and Var[X].  
+
+This is a very typical problem in **Bayesian analysis**. Here p is
+considered a random variable with a prior distribution, which is
+essentially what we know about p before ("prior") to the experiment. The
+experiment gives us data (X), and then we combine the prior and the data
+to get the posterior p|X. It was in large part the goal of making
+Bayesian analysis practical which has fueled the research into methods
+for generating data from complex distributions in the last 20 years.  
+To use the Gibbs sampler we need the conditional distributions of X|p
+and p|X. From the definition above we know
+
+X|p ~ Bin(n,p)
+
+Also  
+![](graphs/mcmc8.png)  
+so the Gibbs sampler is as follows:
+
+1) Choose an initial value for p, say p^(0)^=0.5 and set k=1  
+2) X^(k)^ ~ Bin(n,p^(k-1)^)  
+3) p^(k)^ ~ Beta(x^(k)^+α,n-x^(k)^+β)
+
+This is implemented in **gibbs3**. Here we use the following strategy to
+get "independent" samples: run the sampler for a short period (B=10) and
+then start from scratch. For each run pick the last observation.
+
+```{r}
+gibbs.binom <- function (n = 10, alpha = 2, 
+                         beta = 5, B = 10, M = 1000) {
+    X = rep(0, M)
+    for (i in 1:M) {
+        p = 0.5
+        for (j in 2:B) {
+            X[i] = rbinom(1, n, p)
+            p = rbeta(1, X[i] + alpha, n - X[i] + beta)
+        }
+    }
+    c(mean(X), var(X))
+}
+gibbs.binom()
+```
+
+
+It can be shown that the Gibbs sampler is actually a special case of the
+Hastings-Metropolis algorithm!
+
+For much more on simulation go take my course [ESMA 5015: Simulation](http://academic.uprm.edu/wrolke/esma5015/index.html)

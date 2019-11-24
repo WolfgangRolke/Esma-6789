@@ -1,0 +1,171 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+
+# Other Stochastic Processes
+ 
+## Martingales
+
+A *martingale* is a stochastic process that formalizes the idea of a
+fair game.
+
+**Definition**
+
+A stochastic process {Z~n~,n≥1} is said to be a *martingale*
+process if
+
+E[|Z~n~|]&lt;∞ for all n  
+  
+and  
+  
+E[Z~n+1~|Z~1~,..,Z~n~]=Z~n~  
+
+so if we think of Z~n~ as the fortune of a gambler than for a
+martingale process the expected fortune stays constant. Note
+
+E[Z~n+1~]=E{E[Z~n+1~|Z~1~,..,Z~n~]}=E[Z~n~]=..=E[Z~1~]
+
+#### **Example** 
+
+let X~1~, X~2~,.. be independent rv's with
+mean 0 and let Z~n~=X~1~+..+X~n~, then  
+  
+![](graphs/mart1.png)
+
+#### **Example**
+
+let X~1~, X~2~,.. be independent rv's with
+mean 1 and let Z~n~=X~1~×..×X~n~, then  
+  
+![](graphs/mart2.png)
+
+#### **Example**
+
+Let $\{N(t); t\ge0\}$ be a Poisson process with rate $\lambda$, then $X(t)=N(t)-\lambda t$ is a (continuous-time) martingale.
+
+The fact that the expectation only depends on the last time point before t follows from the fact that a Poisson process is a Markov process. Now
+
+$$
+\begin{aligned}
+&E[X(t)|X(s)] = \\
+&E[N(t)-\lambda t| N(s)-\lambda s] =\\
+&E[N(t)-\lambda t| N(s)] =\\
+&E[N(t)-N(s)+N(s)-\lambda t| N(s)] =\\
+&E[N(t)-N(s)| N(s)] + E[N(s)-\lambda t| N(s)] =\\
+&E[N(t)-N(s)] + N(s)-\lambda t =\\
+&\lambda(t-s) + N(s)-\lambda t =\\
+&N(s)-\lambda s=X(t)
+\end{aligned}
+$$
+
+The more impressive result is the reverse: this is the only counting process that is a martingale! (Watanabe 1964)
+
+**Definition** 
+
+A positive integer-valued, possibly infinite, rv N is
+said to be a *random time* for the process {Z~n~,n≥1} if the
+event {N=n} is determined by the random variables
+Z~1~,..,Z~n~. That is, knowing
+Z~1~,..,Z~n~ tells us whether or not N=n. If
+P(N&lt;∞}=1, then N is called a *stopping time*
+
+#### **Example** 
+
+say a player plays roulette. He starts with $100 and bets
+$1 in each round. He decides to stop if he reaches $200 (or goes broke).
+Then if N is the number of games he plays N is stopping time.
+
+**Definition** 
+
+Let N be a random time for the process
+{Z~n~,n≥1}, then  
+![](graphs/mart3.png)  
+is called the stopped process.
+
+**Proposition**  
+
+If N is a random time for the martingale {Z~n~,n≥1}, then the
+stopped process is also a martingale.  
+without proof
+
+Here is the main result for martingales:
+
+**Theorem (The Martingale Stopping Theorem}**  
+
+If either
+
+(i) the stopped process is uniformly bounded  
+(ii) N is bounded, or  
+(ii) E[N]&lt;∞
+
+and there is an M&lt;∞ such that
+
+E[|Z~n+1~-Z~n~|
+|Z~1~,..,Z~n~]&lt;M
+
+then E[Z~n~]=E[Z~1~]
+
+In other words in a fair game if a gambler uses a stopping time to
+decide when to quit, then his expected final fortune is equal to his
+expected initial fortune. Thus in the sense of expected value, no
+successful gambling strategy is possible if one of the conditions of the
+theorem are satisfied.
+
+#### **Example** 
+
+There are many supposedly "guaranteed" strategies on how to
+win in a casino. A popular one is this: bet $1 on red in roulette. if
+you loose double your bet and so on. Say you loose 3 times and then win,
+then your net-win is -1+(-2)+(-4)+8=+1, so you win $1. In fact a
+"sequence" of n losses followed by a win always ends with an overall win
+of $1! Great! Unfortunately according to the martingale stopping
+theorem, even if roulette were a fair game this would still not work!
+Why not?  
+By the way, strategies of this type have a name, the St. Petersburg
+strategy.
+
+**Corollary (Wald's equation)** 
+
+If X~i~, i≥1 are iid with
+E[|X|]&lt;∞ and if N is a stopping time for X~1~,
+X~2~,.. with E[N]&lt;∞, then  
+![](graphs/mart4.png)  
+
+#### **Example** 
+
+suppose a computer randomly generates integers. Let N be the
+number of integers it has to generate before we see a predetermined
+sequence, for example (0 0 0 0) or maybe (0 1 2 3 4 5).  
+  
+To compute E[N] imagine a sequence of gambles, each initially having 1
+unit, playing a fair game. Gambler i begins playing at the beginning of
+the i^th^ day bets 1 unit that the value on that day is equal
+to 0. If he wins (and so has 10 units) he bets those 10 units on the
+second day, again to get 0. If he wins again he will have 100 units and
+so on. If 0 0 0 0 happens he wins $10000-$1 = $9999, if any of his bets
+fails he looses $1. At the beginning of each day another gambler starts
+to play. If we let X~n~ denote the total wining of the casino
+after the n^th^ day, then since all bets are fair X~n~
+is a martingale with mean 0. Let N denote the time until 0 0 0 0
+happens. Now at the end of day N each of the gamblers 1,..,N-4 would
+have lost 41, gambler N-3 would have won $9999, gambler N-2 would have
+won $999, gambler N-1 $99 and gambler N $9. So
+
+X~N~=N-4-$9999-$999-$99-$9=N-11110=0, so E[N]=11110

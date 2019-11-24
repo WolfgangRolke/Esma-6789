@@ -1,0 +1,797 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+
+# Markov Chains and Markov Processes
+ 
+## Discrete - Time Markov Chains
+
+
+The sequence of r.v. X~1~, X~2~, .. is said to be a
+Markov chain if for any event A we have
+
+P(X~n~ $\in$  A | X~1~ = x~1~,
+.., X~n-1~=x~n-1~) = P(X~n~
+$\in$  A | X~n-1~ = x~n-1~)
+
+that is X~n~ depends only on X~n-1~ but not on any of
+the r.v. before it.
+
+#### **Example** (Random Walk) 
+
+Say we flip a coin repeatedly. Let the random
+variable Y~i~ be 1 if the i^th^ flip is heads, -1
+otherwise.
+
+Now let X~n~ = ∑^n^~i=1~ Y~i~
+
+  
+Clearly we have  
+![](graphs/mark11.png)
+
+If we think of the index n as a time variable, then all that matters for
+the state of the system at time n is where it was at time n-1, but not
+on how it got to that state.
+
+For a Markov chain (that is a stochastic process with a discrete state
+space) all the relevant (probability) information is contained in the
+probability to get from state i to state j in k steps. For k=1 this is
+contained in the transition matrix P = (p~ij~), and in fact as
+we shall see that P is all we need.  
+
+#### **Example** (Random Walk, cont)  
+Here we have p~ij~ = 1/2 if |i-j|=1, 0 otherwise
+
+#### **Example** (Asymmetric Random Walk) 
+
+As above the state space are the
+integers but now we go from i to i+1 with probability p, to i-1 with
+probability q and stay at i with probability 1-p-q.
+
+#### **Example** (Ehrenfest chain)  
+Say we have two boxes, box 1 with k balls and box 2 with r-k balls. We
+pick one of the balls at random and move it to the other box. Let
+X~n~be the number of balls in box 1 at time n. We have  
+X~n~ $\in$  {0,1,..,r},
+
+**r=7**  
+![](graphs/ehrenfest1.png)  
+Now
+
+p~k,k-1~ = k/r (pick ball from Box 1, which has k or the r)  
+p~k,k+1~ = (r-k)/r (pick ball from Box 2, which has r-k or the
+r)  
+and  
+p~i,j~ = 0 otherwise.
+
+Note:
+
+p~0,1~ = (r-0)/r = 1  
+p~r,r-1~ = r/r = 1
+
+Ehrenfest used this model to study the exchange of air molecules in two
+chambers connected by a small hole.
+
+Say we have a Markov chain X~n~, n=1,2,.. with transition
+matrix P. Define the n-step transition matrix P^(n)^ =
+(p^(n)^~ij~) by p^(n)^~ij~ =
+P(X~n~=j|X~1~=i). Of course P^(1)^ = P. Now  
+![](graphs/mark12.png)
+
+#### **Example** (Ehrenfest chain)  
+Let's find the 2-step transition matrix for the Ehrenfest chain with
+r=3. The transition matrix is given by  
+![](graphs/mark13.png)  
+and so the 2-step transition matrix is  
+![](graphs/mark14.png)  
+For example, P(X~3~=2|X~1~=2) = 7/9 because if
+X~1~ = 2 the chain could have gone to 1 (with probability 2/3)
+and then back to 2 (with probability 2/3) or it could have gone to 3
+(with probability 1/3) and then back to 2 (with probability 1), so we
+have  
+  
+P(X~3~=2|X~1~=2) = 2/3\*2/3 + 1/3\*1 = 7/9.
+
+**Proposition**  
+let P=(p~ij~) be a transition matrix. Then
+∑~j~p~ij~=1 for all i.  
+  
+proof  
+![](graphs/mark162.png)
+
+In order to find P^(n)^ we could just find PPP..P n-times. With
+a little linear algebra this becomes easier:
+
+For many matrices P there exists a matrix U and a diagonal matrix D such
+that P=UDU^-1^. Here is how to find U and D:  
+First we need to find the eigenvalues of the matrix P, that is we need
+to find the solutions of the equations Px=λx. This is equivalent to
+(P-λI)x=0 or to det(P-λI)=0. So we have:  
+![](graphs/mark16.png)  
+The D above now is the matrix with the eigenvalues on the diagonal. The
+columns of the matrix U are the corresponding eigenvectors (with
+Euclidean length 1), so for example  
+![](graphs/mark17.png)  
+Of course we have det(P-λI)=0, so this system is does not have a unique
+solution. Setting x~1~=1 we can then easily find a solution
+x=(1,-1,1,-1).  
+  
+This vector has Euclidean length
+√(1^2^+(-1)^2^+1^2^+(-1)^2^) = 2, so
+the normalized eigenvector is x=(1/2,-1/2,1/2,-1/2)  
+  
+Similarly we can find eigenvectors for the other eigenvalues.
+Alternatively (and a lot easier!) we can use the R function **eigen** to
+do the calculations for us.  
+  
+Why does this help in computing P^(n)^? It turns out that we
+have P^(2)^ = PP = UDU^-1^UDU = UDDU^-1^ =
+UD^2^U^-1^, and  
+![](graphs/mark18.png)  
+and in general we have P^(n)^ = UD^n^U^-1^  
+
+`r hl()$hr()`
+
+Notice that this result allows us to define functions whose arguments are matrices: Say A is some $d\times d$ matrix with $A=UDU^{-1}$. Let p be a polynomial of the form 
+
+$$p(x)=\sum_{i=1}^n a_ix^i$$
+
+The we define $p(A)$ to be
+
+$$
+\begin{aligned}
+&p(A)    = \\
+&\sum_{i=1}^n a_iA^i    = \\
+&\sum_{i=1}^n a_i(UDU^{-1})^i    = \\
+&U\left(\sum_{i=1}^n a_iD^i\right)U^{-1}  \\
+\end{aligned}
+$$
+
+and finally for any function f that has a Taylor series  expansion $f(x)=\sum_{i=1}^\infty a_ix^i$ we can define 
+
+$$f(A)=U\left(\sum_{i=1}^\infty a_iD^i\right)U^{-1}$$
+
+#### **Example**
+
+Say 
+
+$$
+A =
+\begin{bmatrix}
+ 1 &  2\\
+2 &   1 \\
+\end{bmatrix}
+$$
+
+what would be $f(A)=\exp(A)$?
+
+$$
+\begin{aligned}
+&\det(A-\lambda I)  = (1-\lambda)^2-4=0\\
+&\lambda  =1\pm2 \\
+\end{aligned}
+$$
+so
+
+$$
+D=
+\begin{bmatrix}
+-1  &  0\\
+0  &  3\\
+\end{bmatrix}
+$$
+
+$$
+(A-\lambda_1)x =
+\begin{bmatrix}
+ 2 &  2\\
+2 &   2 \\
+\end{bmatrix} 
+\begin{bmatrix}
+ x_1\\
+x_2 \\
+\end{bmatrix}=
+\begin{bmatrix}
+0 \\
+0 \\
+\end{bmatrix}
+$$
+
+so $2x_1+2x_2=0$, or $x_1=-x_2$. Say $x_1=1$, then $\sqrt{1^2+(-1)^2}=\sqrt 2$.
+
+$$
+(A-\lambda_2)x =
+\begin{bmatrix}
+ -2 &  2\\
+2 &   -2 \\
+\end{bmatrix} 
+\begin{bmatrix}
+ x_1\\
+x_2 \\
+\end{bmatrix}=
+\begin{bmatrix}
+0 \\
+0 \\
+\end{bmatrix}
+$$
+
+so $-x_1+x_2=0$, or $x_1=x_2$. Say $x_1=1$, then $\sqrt{1^2+1^2}=\sqrt 2$ and we have
+
+$$
+U = \frac1{\sqrt 2}
+\begin{bmatrix}
+1  &  -1\\
+1 &   1 \\
+\end{bmatrix} 
+$$
+Also
+
+
+$$
+U^{-1} = \frac1{\sqrt 2}
+\begin{bmatrix}
+1  &  1\\
+-1 &   1 \\
+\end{bmatrix} 
+$$
+
+Now we have $f(x)=\exp(x)=\sum_{n=0}^\infty x^n/n!$, and so
+
+$$
+\begin{aligned}
+&\log(A)    = U\left(\sum_{n=0}^\infty D^n/n! \right)U^{-1}\\
+\end{aligned}
+$$
+$$
+D^n/n!=\\
+\begin{bmatrix}
+-1  &  0\\
+0 &  3\\
+\end{bmatrix}^n/n!=\\
+\begin{bmatrix}
+(-1)^{n}/n!  &  0\\
+ 0 &   3^{n}/n! \\
+\end{bmatrix}
+$$
+
+$$
+\sum_{n=0}^\infty D^n/n!= 
+\begin{bmatrix}
+\sum_{n=0}^\infty (-1)^n/n!  &  0\\
+ 0 &   \sum_{n=0}^\infty 3^n/n! \\
+\end{bmatrix}=\\
+\begin{bmatrix}
+e^{-1}   &  0\\
+ 0 &   e^3 \\
+\end{bmatrix}
+$$
+
+and finally
+
+$$
+\exp(A)=
+U
+\begin{bmatrix}
+e^{-1}   &  0\\
+ 0 &   e^3 \\
+\end{bmatrix}
+U^{-1}=
+$$
+
+$$
+\frac1{\sqrt 2}
+\begin{bmatrix}
+1  &  -1\\
+1 &   1 \\
+\end{bmatrix}
+\begin{bmatrix}
+e^{-1}   &  0\\
+ 0 &   e^3 \\
+\end{bmatrix}
+\frac1{\sqrt 2}
+\begin{bmatrix}
+1  &  1\\
+-1 &   1 \\
+\end{bmatrix} =
+$$
+$$
+\frac1{2}
+\begin{bmatrix}
+1  &  -1\\
+1 &   1 \\
+\end{bmatrix}
+\begin{bmatrix}
+e^{-1}   &  e^{-1}\\
+ -e^3 &   e^3 \\
+\end{bmatrix}
+$$
+
+$$
+\frac1{2}
+\begin{bmatrix}
+e^{-1}+e^3   &  e^{-1}-e^3\\
+ e^{-1}-e^3 &   e^{-1}+e^3 \\
+\end{bmatrix}
+$$
+
+
+**Proposition**:
+
+λ=1 is always an eigenvalue of a transition matrix, with eigenvector
+(1/√d 1/√d .. 1/√d)^T^ where d is the dimension of P  
+![](graphs/mark163.png)  
+
+**Theorem**
+
+An important consequence of the Markov property is the fact that given
+the present the past and the future are independent. This is formalized
+in the Chapman-Kolmogorov equation:  
+![](graphs/mark15.png)
+
+**proof**
+
+follows directly from the law of total probability
+
+------------------------------------------------------------------------
+
+### Classification of States and Chains
+
+**Definition**
+
+State j is said to be *accessible* from state i if there exists n≥0 such
+that p~ij~^(n)^&gt;0 and we write i→j. If i is
+accessible from j and j is accessible from i then i and j are said to
+*communicate*, and we write i↔j
+
+**Proposition**
+
+Communication is an equivalence relation. That is
+
+i) i↔i
+
+ii) if i↔j then i ↔i
+
+iii) if i↔j and j ↔k then i↔k
+
+**proof**
+
+i) and ii) follow from the definition of communication. For iii) suppose
+i↔j and j ↔k, so there exist n and m such that
+
+p~ij~^(n)^&gt;0 and p~jk~^(m)^&gt;0
+
+But then
+
+p~ik~^(n+m)^ = ∑~l~
+p~il~^(n)^p~lk~^(m)^ ≥
+p~ij~^(n)^p~jk~^(m)^ &gt; 0
+
+**Definition**
+
+i) Two states that communicate are said to be in the same *class*. A
+Markov chain is said to be *irreducible* if it consists of only one
+class
+
+ii) A state i is said to have *period* d if
+p~ii~^(n)^=0 whenever n is not divisible by d and d is
+the largest integer with this property. A state with period 1 is said to
+be *aperiodic*. Let d(i) denote the period of state i.
+
+  
+#### **Example**
+
+Both the two random walks and the Ehrenfest chain are
+irreducible. Random walk I and the Ehrenfest chain have period 2. Random
+Walk II is aperiodic.
+
+#### **Example** (Casino) 
+
+Consider the following chain: you go to the Casino
+with $10. You play Blackjack, always betting $5. Let X~n~ be
+your "wealth" after the n^th^ game. Then X~n~
+$\in$  {0,5,10,15,..} and P(X~n+k~ =
+j|X~k~=0) = 0 for all n &gt; 1. ("0" is called a coffin or
+absorbing state). So this chain is not irreducible.
+
+**Proposition**
+
+if i↔j then d(i)=d(j)
+
+**proof**
+
+Let n and m be such that
+p~ji~^(n)^p~ij~^(m)^ &gt; 0 and
+suppose that p~ii~^(s)^&gt; 0, so d(i) divides s. Then
+
+p~jj~^(n+m)^ ≥
+p~ji~^(n)^p~ij~^(m)^ &gt; 0
+
+p~jj~^(n+s+m)^ ≥
+p~ji~^(n)^p~ii~^(s)^p~ij~^(m)^
+&gt; 0
+
+therefore d(j) divides both n+m and n+m+s, and so it also divides
+n+m+s-(n+m) = s. Therefore d(j) divides s as well. The argument is
+symmetric in i and j, so d(i)=d(j)
+
+------------------------------------------------------------------------
+
+**Definition**
+
+i) For any states i and j let f~ij~^n^ be the
+probability that starting at i the chain visits j for the first time
+after n steps . Formally
+
+f~ij~^0^ = 0
+
+f~ij~^n^ = ∑~n~ P(X~n~
+=j,X~k~≠j,k=1,..,n-1|X~0~=i)
+
+ii) Let
+
+f~ij~ = ∑~n~ f~ij~^n^
+
+be the probability that the chain starting at i ever visits j
+
+**Definition**
+
+i) A state i of a Markov chain is said to be *recurrent* if
+f~ii~ =1. A state that is not recurrent is called *transient*.
+
+ii) A recurrent state i is said to be *positive recurrent* if starting
+at i the expected time until the return to i is finite, otherwise it is
+called *null recurrent*.
+
+iii) Positive recurrent aperiodic states are called *ergodic*.  
+
+#### **Example** 
+
+The Ehrenfest chain is clearly recurrent. In the Casino
+example "0" is a recurrent state, the others are not.
+
+Are the random walks recurrent? Good question! we will answer it using
+the following theorem:
+
+**Theorem**
+
+A state i is recurrent if and only if  
+![](graphs/mark141.png)
+
+**proof**
+
+Because of the Markov property once the chain returns to i, everything
+starts all over again and so the probability that the chain returns to i
+a second time is (f~ii~)^2^ and a third time is
+(f~ii~)^3^ and so on.
+
+Let M be the total number of returns to state i, then we have just shown
+that M has a geometric distribution with  
+![](graphs/mark143.png)
+
+Note that we have
+
+state i is transient iff f~ii~&lt;1 iff
+E[M|X~0~=i]&lt;∞  
+
+We can write M as  
+![](graphs/mark144.png)
+
+and so we are done.
+
+The next corollary shows that, like periodicity, recurrence is a class
+property:
+
+### Corollary
+
+if state i is recurrent and i↔j, then j is recurrent
+
+**proof**
+
+say n and m are such that
+
+p~ij~^(n)^&gt;0 and p~ji~^(m)^&gt;0
+
+now for any s≥0
+
+p~jj~^(n+m+s)^ ≥ p~ji~^(m)^
+p~ii~^(s)^ p~ij~^(n)^
+
+and so
+
+∑~s~ p~jj~^(n+m+s)^ ≥ ∑~s~(
+p~ji~^(m)^ p~ii~^(s)^
+p~ij~^(n)^) =
+p~ji~^(m)^p~ij~^(n)^∑~s~
+p~ii~^(s)^ = ∞
+
+### Corollary
+
+if i↔j and state j is recurrent, then f~ij~ = 1
+
+**proof**
+
+Suppose X~0~=i, and let n be such that
+p~ij~^(n)^&gt;0. Now p~ij~^(n)^
+maybe less than 1, so it is possible that X~n~≠j. If that
+happens let's say we missed opportunity 1. If so, let T~1~ be
+the next time the chain visits i. Note that
+
+P(T~1~&lt;∞)=1
+
+by the corollary above. Say we missed opportunity 2 if
+X~T1+n~≠j, and let T~2~ be the time of the first visit
+to i after that, and so on.
+
+Because at each visit to i the chain starts all over again it is clear
+that T~k~ has a geometric distribution with success probability
+p~ij~^(n)^. Therefore
+
+E[T~k~] =1/p~ij~^(n)^ &lt; ∞
+
+and because there are infinitely many T~k~ 's sooner or later
+there will be a success, or f~ii~=1
+
+------------------------------------------------------------------------
+
+Let N~j~(t) denote the number of transitions into j by time t.
+If j is recurrent and X~0~=j, then the process
+probabilistic ally starts all over , and so {N~j~(t),t≥0} is a
+renewal process with interarrival time distribution {f~jj~
+^n^,n≥0}.
+
+ 
+
+#### **Example** Random Walk
+
+for simplicity we assume p+q=1, that is the chain always jumps. Then  
+![](graphs/mark145.png)
+
+So the state 0 is recurrent iff p=1/2. But we can get to 0 from any
+other state and back, so all states are recurrent.
+
+Let's consider a more general problem:
+
+#### **Example** (Random Walk III) 
+
+let the state space be the lattice of
+integers on R^d^, that is X~n~ =(i~1~, ..,
+i~d~) for i~j~ any integer. Then the chain goes from
+one point on the lattice to any of the 2d points that differ by one in
+one coordinate with probability 1/2d.
+
+#### **Example** Random Walk in R^2^: 
+
+let **0**=(0,0), then since
+the chain is irreducible, if **0** is recurrent every state is
+recurrent. Again returns to **0** are only possible in 2n steps, of
+which i have to be left and i right, n-i up and n-i down. Now the
+probabilities are multinomial, and we have  
+![](graphs/mark154.png)  
+and so all states are recurrent.
+
+#### **Example** Random Walk in R^d^ 
+
+Notice that  
+![](graphs/mark155.png)  
+This is in effect true because we can think of the random walk in
+R^d^ as d independent random walks, one in each of the
+"dimensions". Therefore  
+![](graphs/mark156.png)
+
+The first proof of this was given by George Polya in 1921, and described
+very nicely by Kakutani, who said
+
+*A drunk man will find his way home but a drunk bird may get lost*.
+
+#### **Example** 
+
+Let's return to 1 dimension and consider the following
+question: if P(X~1~=1)=p=1/2 we know that state 0 (like all
+others) is recurrent,so
+
+P(chain returns to 0 | it starts at 0) =1
+
+But what about if 0&lt;p&lt;1/2? First of all
+
+P(chain returns to 0 | it starts at 0) ≥
+P(X~2~=1,X~1~=-1|X~0~=0) = pq &gt; 0
+
+But what is P(chain returns to 0 | it starts at 0)? Well first of all
+
+P(chain returns to 0) = P(chain returns to 0|X~1~=-1)(1-p) +
+P(chain returns to 0|X~1~=1)p
+
+We know the chain is transient, so P(0 infinitely often)=0. Moreover,
+p&lt;1/2, so X~n~→-∞ with probability 1, therefore
+
+P(chain returns to 0|X~1~=1)=1
+
+Now  
+![](graphs/mark157.png)  
+because α is the probability to "ever reach the state to the right", and
+now we have to do that twice.
+
+Finally
+
+![](graphs/mark158.png)  
+In general we have
+
+P(chain returns to i | chain starts at i) = 2\*min(p,1-p)
+
+#### **Example** 
+
+let X~1~, X~2~,.. be independent Pois(1).
+Let S~n~= X~1~+..+X~n~, so
+S~n~~Pois(n). Therefore  
+![](graphs/mark153.png)  
+and so we have a proof of Sterling's formula!
+
+#### **Example** 
+
+Say we have a Markov chain with states {0,1,2} and
+transition matrix  
+![](graphs/mark164.png)  
+Find P(X~3~=0)
+
+A little linear algebra shows  
+![](graphs/mark165.png)  
+Now  
+![](graphs/mark166.png)  
+so to calculate P(X~3~=0) we need to specify the distribution
+of X~0~. Two common ways are to specify a specific state (say
+0), or to choose one at random:  
+![](graphs/mark167.png)  
+Soon we will see another common choice
+
+### Stationary Distribution and Limit Theorems
+
+
+#### **Example** 
+
+Consider again the Ehrenfest chain with r=3, and compute
+P^(n)^:
+
+![](graphs/mark139.png)  
+You notice that P^(n)^ seems to converge to a limit. We will
+now study this limit.
+
+Let S be the state space of a Markov chain {X~n~,n≥0} with
+transition matrix P. Let π be a "measure" on S. Then π is called a
+stationary measure of {X~n~,n≥0} if
+
+**π^T^P=π^T^**
+
+We won't discuss exactly what it means for π to be a "measure". You can
+think of it in the same way as a probability distribution, only that we
+don't have ∑π~i~=1.
+
+  
+Note:
+
+π^T^P=π^T^ iff
+(P^T^π)^T^=π^T^ iff P^T^π=π iff
+(P^T^-I)π=0
+
+so again the system of equations is singular.
+
+#### **Example** 
+
+Say we have a Markov chain with states {0,1,2} and
+transition matrix  
+![](graphs/mark164.png)  
+Find P(X~3~=0) if the chain starts in its stationary
+distribution.
+
+  
+![](graphs/mark168.png)
+
+but 0.3125 = 5/16, so we find
+
+P(X~3~=0|X~0~ has distribution π) = π
+
+And so we find if the chain starts in its stationary distribution it
+stays there! As it turns out this is true in general.
+
+#### **Example** (Ehrenfest chain) 
+
+To find a (?) stationary measure we have
+to solve the system of equations  
+π~j~ = ∑~i~ π~i~P~ij~ i=0,1..,r  
+often we can get unique solution by requiring that π be a proper
+probability distribution, that is that ∑π~i~ = 1  
+Here this means the system  
+
+π~0~ = 1/3π~1~  
+π~1~ = π~0~+2/3π~2~  
+π~2~ = 2/3π~1~ + π~3~  
+π~3~ = 1/3π~2~  
+π~0~ + π~1~ + π~2~ + π~3~ = 1  
+
+  
+which has the solution π = (1/8,3/8,3/8,1/8)  
+In the general case we find the stationary measure  
+![](graphs/mark112.png)
+
+The interpretation is the following: Say we choose the initial state
+X~0~ according to π, that is
+
+P(X~0~=i) = π~i~
+
+Then π~i~ is the long-run proportion of time the chain spends
+at state i, that is
+
+π~i~ = lim ∑^N^~k=1~ I[X~n~=i]/N.
+
+#### **Example** (Random Walk) 
+
+Let S be the integers and define a Markov
+chain by p~i,i+1~ = p and p~i,i-1~ = q = 1-p. A
+stationary measure is given by π~i~=1 for all i because
+(πP)~i~ = 1p+1q = 1.  
+Now assume p ≠ q and define π~i~ =(p/q)^i^. Then  
+![](graphs/mark111.png)  
+Note that this shows that stationary measure are not unique, even if we
+require ∑π~i~=1
+
+One use of the stationary distribution is an extension of the WLLN to
+Markov chains. That is, say h is a function on the state space, then  
+![](graphs/mark19.png)  
+where Z is a r.v. with density π.
+
+One of the main results for Markov chains is the following:
+
+  
+If the Markov chain {X~n~,n≥0} is irreducible and ergodic,
+then  
+![](graphs/mark110.png)
+
+#### **Example**
+
+Of course this result does not apply to the Ehrenfest
+chain, which is not aperiodic, but the result holds anyway as we have
+seen.
+
+Here is another property of Markov chains:
+
+**Definition**: 
+
+A Markov chain is said to be *time-reversible* if
+
+π~i~P~ij~=π~j~P~ji~ for all i≠j
+
+**Theorem** 
+
+Let Markov chain {Y~n~,n≥0} be time reversible. Fix
+a time T large and run the chain backwards, that is let
+X~n~=Y~T-n~. The the transition matrix of the chain
+{X~n~,n≥0} is the same as the transition matrix of
+{Y~n~,n≥0}
+
+![](graphs/mark169.png)
+
+In other words, for a time reversible Markov chain if the chain is
+started from π and run backwards in time it again has transition matrix
+P.
+
+#### **Example** 
+
+The Ehrenfest chain is time-reversible. We will show this
+for the case i=k, j=k+1:  
+![](graphs/mark113.png)

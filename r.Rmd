@@ -1,0 +1,147 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## R Commands
+
+
+In general you can always find the argument list of a function f by
+typing args(f) and get a detailed description by typing help(f).  
+
+<table>
+<tbody>
+<tr class="odd">
+<td>apply(x,1,f) (or apply(x,2,f))</td>
+<td>apply function f to each row (or column) of matrix x</td>
+</tr>
+<tr class="even">
+<td>c(1:5,7)</td>
+<td>Returns vector with numbers 1 to 5 and 7</td>
+</tr>
+<tr class="odd">
+<td>cbind(x,y,z) (r rbind(x,y,z))</td>
+<td>make a matrix with columns (or rows) from x,y and z</td>
+</tr>
+<tr class="even">
+<td>ceiling(x) (and floor(x))</td>
+<td>smallest integer greater or equal to x</td>
+</tr>
+<tr class="odd">
+<td>cumsum(x)</td>
+<td>at each index i have x[1]+..+x[i]</td>
+</tr>
+<tr class="even">
+<td>Distributions</td>
+<td>Leading r (like rnorm) returns a random sample</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Leading d (like dnorm) returns density</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Leading p (like pnorm) returns a cdf</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Leading q (like qnorm) returns quantiles</td>
+</tr>
+<tr class="even">
+<td>hist(x)</td>
+<td>draws a histogram of data in x</td>
+</tr>
+<tr class="odd">
+<td>ifelse(x&gt;5,0,1)</td>
+<td>if x&gt;5 return 0, otherwise return 1</td>
+</tr>
+<tr class="even">
+<td>lines(x,y)</td>
+<td>add a line to a graph</td>
+</tr>
+<tr class="odd">
+<td>ls() or objects()</td>
+<td>return a listing of the functions (like "dir")</td>
+</tr>
+<tr class="even">
+<td>matrix(0,3,5)</td>
+<td>initialize a matrix with 3 columns and 5 rows with zeros</td>
+</tr>
+<tr class="odd">
+<td>x[order(y)]</td>
+<td>sort vector x according to the order in vector y</td>
+</tr>
+<tr class="even">
+<td>par()</td>
+<td>sets up a graphic, things such as more than one graph on 1 page, margins, titles etc.</td>
+</tr>
+<tr class="odd">
+<td>paste("A",1:5,sep="")</td>
+<td>make a vector of characters "A1", .., "A5"</td>
+</tr>
+<tr class="even">
+<td>plot(x,y)</td>
+<td>Scatterplot of x vs. y</td>
+</tr>
+<tr class="odd">
+<td>print(c(x,y))</td>
+<td>output vector c(x,y) to screen</td>
+</tr>
+<tr class="even">
+<td>quantile(x,0.8)</td>
+<td>finds the 80^th^ percentile of the vector x</td>
+</tr>
+<tr class="odd">
+<td>x = rep(1,10)</td>
+<td>Initializes a vector x of length 10 with 1s</td>
+</tr>
+<tr class="even">
+<td>sample(x,size=n,replace=F)</td>
+<td>take a random sample from vector x</td>
+</tr>
+<tr class="odd">
+<td>seq(0,10,length=100)</td>
+<td>generates a vector of length 100 with numbers equally spaced from 0 to 10</td>
+</tr>
+<tr class="even">
+<td>segments(x1,y1,x2,y2)</td>
+<td>adds line segments from (x1,y1) to (x2,y2) to a graph</td>
+</tr>
+<tr class="odd">
+<td>sort(x)</td>
+<td>obvious</td>
+</tr>
+<tr class="even">
+<td>table(x) or table(x,y)</td>
+<td>tabulate the values in x, cross-tabulate the values in x and y</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>

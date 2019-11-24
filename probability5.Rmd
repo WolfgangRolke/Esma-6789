@@ -1,0 +1,154 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Inequalities and Limit Theorems
+
+### Inequalities
+
+**Theorem** (Markov's Inequality)
+
+If X takes on only nonnegative values, then for any a&gt;0  
+![](graphs/prob51.png)
+
+**Theorem** (Chebyshev's Inequality)
+
+  
+Let X be a rv with mean μ and standard deviation σ, let k&gt;0, then  
+![](graphs/prob52.png)
+
+**Theorem** (Chernoff Bounds)
+
+Let X be a rv with moment generating function ψ(t) =
+E[e^tX^]. Then by Markov's inequality for any a&gt;0  
+P(X≥a) ≤ e^-ta^ψ(t) $\forall$  t&gt;0  
+P(X≤a) ≤ e^-ta^ψ(t) $\forall$  t&lt;0
+
+**Proof** For t&gt;0  
+![](graphs/prob527.png)  
+The proof for t&lt;0 is similar
+
+#### **Example** 
+
+say Z~N(0,1), then  
+![](graphs/prob528.png)  
+
+**Theorem** (Jensen's Inequality)
+
+If f is a convex function then E[f(X)]≥f(EX).
+
+### Limit Theorems
+
+**Definition**
+
+Let X, X~1~, X~2~, .. be random variables. We say  
+
+X~n~ → X **in mean** iff E[X~n~] → E[X]  
+  
+X~n~ → X **in quadratic mean** iff E[X~n~] → E[X]
+and Var[X~n~] → 0
+
+(note that this implies that the limit has to be a constant)  
+  
+X~n~ → X **in distribution** (or in law) iff
+F~X~n~~(x) → F~X~(x) $\forall$  x
+where F~X~ is continuous  
+  
+X~n~ → X **in probability** iff $\forall$  ε&gt;0
+P(|X~n~-X|&gt;ε) → 0  
+  
+X~n~ → X **almost surely** iff there exists a set N such that
+X~n~(ω)→X(ω) $\forall$ ω$\in$ S\\N
+and P(N)=0 (X~n~(ω) converges to X(ω) for all ω's except maybe
+for a set of probability 0)  
+
+#### **Example** 
+
+say X~1~,X~2~,.. are iid with
+P(X~n~=0) = P(X~n~=2) = ½(1-1/n), P(X~n~=1) =
+1/n. Let X be a rv with P(X=0)=P(X=2)=1/2. Now
+
+![](graphs/prob532.png)
+
+and this last probability depends on the joint distribution of
+(X~n~,X). Note the if X~n~ is independent of X we
+have  
+![](graphs/prob533.png)  
+and so we don't have convergence in probability. This is always true.
+
+Let's say the joint density is given by  
+![](graphs/prob534.png)  
+Then  
+![](graphs/prob535.png)
+
+The last one is a bit vague. Generally showing convergence almost surely
+is much harder because it requires some measure theory, (here we would
+have to go back and "invent" a sample space)
+
+#### **Example** 
+
+say X~1~,X~2~,.. are iid U[0.1] Let
+M~n~=max{X~1~,..,X~n~}. Let δ~x~be
+the point mass at x, that is the random variable with
+P(δ~x~=x)=1. Then  
+![](graphs/prob529.png)  
+How about almost sure convergence? It does in fact hold here as well.
+
+**Theorem**
+
+a) convergence in quadratic mean implies convergence in probability.
+
+b) convergence in probability implies convergence in distribution. The
+reverse is true if the limit is a constant.
+
+c) almost sure convergence implies convergence in probability, but not
+vice versa
+
+**Theorem** (Weak Law of Large Numbers)
+
+Let X~1~, X~2~, ... be a sequence of independent and
+identically distributed (iid) r.v.'s having mean μ. Let Z~n~=
+(X~1~+..+X~n~)/n. Then Z~n~→μ in probability.
+
+**Proof** can be found in any probability text book
+
+**Theorem** (Central Limit Theorem)
+
+Let X~1~, X~2~, .. be an iid sequence of r.v.'s with
+mean μ and standard deviation σ. Define the sample mean by
+
+![](graphs/xbar.png)=(X~1~+..+X~n~)/n
+
+Then
+
+√n(![](graphs/xbar.png)-μ)/σ→Z in distribution
+
+#### **Example** 
+
+let's study the CLT on a very simple example: say
+X~1~,X~2~,.. are iid Ber(p). Now  
+![](graphs/prob530.png)  
+  
+
+The CLT is not so much a theorem as a family of theorems. Any of the
+conditions (the same means, the same standard deviations, independence)
+can be relaxed considerably, and still the result holds. Unfortunately
+there is no single set of necessary conditions, so there are many
+theorems for different situations!

@@ -1,0 +1,252 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Generalizations of the Poisson Process
+
+
+### Nonhomogeneous Poisson Process
+
+**Definition**
+
+A counting process {N(t);t≥0} is said to be a nonhomogeneous Poisson
+process with intensity function λ(t), t &gt;0 if  
+  
+1) N(0)=0  
+2) N(t) has independent increments  
+3) P(N(t+h)-N(t)=1) = λ(t)h + o(h)  
+4) P(N(t+h)-N(t)≥2) = o(h)
+
+![](graphs/genpoiss1.png)  
+Using induction it is then easy to show that  
+![](graphs/genpoiss2.png)  
+
+#### **Example** 
+
+say you run a hot dog stand that opens at 8am. From 8am to
+11am customers arrive, on average, at a steadily increasing rate of that
+starts at 5 customers per hour and reaches 20 at 11am. From 11am to 1 pm
+that average rate is constant at 20 customers per hour. Finally from 1pm
+to 5pm the rate drops steadily from 20 to 12. If we assume that arrivals
+are independent, we have a nonhomogeneous Poisson process with  
+![](graphs/genpoiss3.png)
+
+and λ(t)=λ(t-9) for t&gt;9 (the next day)
+
+What is the probability that now customers arrive between 8:30am and
+9:30am?
+
+The number of arrivals between 8:30am and 9:30am has a Poisson
+distribution with rate m(3/2)-m(1/2)  
+![](graphs/genpoiss4.png)  
+What is the expected number of customers between 8:30am and 9:30am?
+
+It is m(3/2)-m(1/2) = 10
+
+### Compound Poisson Processes
+
+Say {N(t),t&gt;0} is a Poisson process, and {Y~i~,i≥t} is a
+family of iid rv's, independent also of N(t). Let  
+![](graphs/genpoiss5.png)  
+then X(t) is called a compound Poisson process.
+
+#### **Example**
+
+1) say Y~i~=1, then X is a regular Poisson process
+
+2) Suppose buses arrive at an event in accordance with a Poisson
+process, and suppose the number of people on each bus is are iid. Say
+X(t) is the total number of people who arrived at time t, the {X(t)} is
+a compound Poisson process
+
+3) Suppose customers leave a supermarket in accordance to some Poisson
+process. If Y~i~ is the amount spent by customer i, and if the
+Y~i~'s are iid then {X(t),t≥0} , the total spent up to time t,
+is a compound Poisson process.
+
+Now
+
+![](graphs/genpoiss6.png)
+
+and
+
+![](graphs/genpoiss7.png)
+
+### Marked Poisson
+
+  
+#### **Example** 
+
+say people arrive at an ATM machine at times given by a
+Poisson process with rate λ. At the machine they either deposit or
+withdraw money. The amount of money deposited or withdrawn by the
+i^th^ person is given by a rv Y~i~, and we can assume
+the Y~i~'s are independent. Say at 8am the machine is refilled
+with money. How much does it have to have so with a probability of 0.99
+it still has money at 4pm, when it is scheduled to be filled again?
+
+Let W~i~ be the waiting time until the i^th^ event in
+the Poisson process, then the sequence (W~i~,Y~i~) is
+called a marked Poisson process.
+
+Let's begin the analysis with a very simple version:
+Y~i~~Ber(p). Let X~1~(t) be the process that considers
+only the times when Y~i~=1 and X~0~(t)
+correspondingly. Then  
+![](graphs/genpoiss8.png)  
+Next we need to following
+
+**Theorem** let N be a Poisson rv with rate λ. Conditional on N let X
+have a binomial distribution with parameters N and p. Then the
+unconditional distribution of X is Poisson with rate λp  
+  
+proof:  
+![](graphs/genpoiss9.png)  
+Now back to our process X~1~. By its definition it has
+independent and stationary increments, X~1~(0)=0 and by the
+theorem above X~1~(t) ~ Pois(λpt). Therefore
+{X~1~(t),t≥0} is a Poisson process rate λp. Obviously also
+{X~0~(t),t≥0} is a Poisson process rate λq. The surprising part
+is the following:
+
+First note that X~1~(t)|N(t)=n ~ Bin(n,p)
+
+![](graphs/genpoiss10.png)  
+and now we find  
+![](graphs/genpoiss11.png)  
+and so we see that X~1~(t) and X~0~(t) are
+independent!
+
+#### **Example** 
+
+Customers arrive at a store according to a Poisson process
+with rate of 2 per hour. Each customer is a "Buyer" with probability 0.3
+or a "Window-Shopper" with probability q=0.7. What is the probability of
+at least 1 sale during a 2 hour period?
+
+P(at least 1 sales) = P(N~1~(t)≥1) = 1-P(N~1~(t)=0) =
+1-exp(-2\*2\*0.3) = 1-e^-1.2^ =0.7
+
+What is the probability that we have made a sale if by time t there
+where k customers in the store?
+
+![](graphs/poiss23.png)
+
+Let's say the Y~i~'s are discrete rv's which take values 0, 1,
+.. with P(Y~i~=k)=a~k~
+
+Now a straightforward extension of the calculations above shows that
+(X~k~(t),t≥0} is Poisson process with rate λa~k~
+
+#### **Example** 
+
+In our ATM problem let's assume that a customer withdraws or
+deposits money as follows:
+
+```{r echo=FALSE}
+tbl <- source("tables/poiss1.R")[[1]]
+kable.nice(tbl[[1]], do.row.names = FALSE)
+```
+
+
+
+#### **Example** (Coupon Collection Problem) 
+
+There are m different coupons.
+Each time a person collects a coupon it is, independently of those
+previously obtained, of type j with probability p~j~. Let N
+denote the number of coupons one needs in order to have a complete
+collection of at least one of each type. Find E[N]
+
+Let N~j~ be the number of coupons needed until we have one of
+type j, then N=max~1≤j≤m~ N~j~ . It is easy to see
+that N~j~~Geom(p~j~), but they are not independent and
+so finding the distribution of their maximum is very difficult
+
+Let's assume that that coupons are collected according to a Poisson
+process with rate 1, and say an event is of type j if the coupon
+collected was of type j. If we let N~j~(t) denote the number of
+type j coupons collected by time t, then it follows that
+{N~j~(t),t≥0} are independent Poisson processes with rates
+p~j~. Let X~j~ denote the time of the first event of
+type j, and let X=max~1≤j≤m~X~j~ be the time when we
+have all the coupons. Now the X~j~ are the waiting times of
+independent Poisson processes, so they have an exponential distributions
+and are independent, so  
+![](graphs/poiss15.png)  
+Now let T~i~ be the i^th^ interarrival time, that is
+the time between finding the (i-1)^st^ and the i^th^
+coupon. the X=∑T~i~, but T~i~~Exp(1), and they are
+independent, so E[X|N]=E[∑T~i~|N]=NE[T~1~|N]=N,
+so
+
+E[X]=E{E[X|N]}=E[N]
+
+For example, say p~1~=..=p~n~=p=1/m, then
+
+![](graphs/poiss16.png)  
+```{r echo=FALSE}
+kable.nice(tbl[[2]], do.row.names = FALSE)
+```
+
+
+What if m-1 have the same probability, but one is rarer, say only half
+of the probability of the others? So (wlog)
+2p~1~==p~2~=..=p~m~=1, then
+p~i~=1/(m-1/2) for i≤2≤m and p~1~=1/[2(m-1/2)]
+
+![](graphs/poiss17.png)  
+this integral has to be found numerically, using some numerical
+integration method. Then we get
+
+```{r echo=FALSE}
+tbl <- source("tables/poiss1.R")[[1]]
+kable.nice(tbl[[3]], do.row.names = FALSE)
+```
+
+
+**Proposition**
+
+If {N~i~(t);t≥0} i=1,..,k represent the number
+of type i events occurring in (0,t] and if P~i~(t) is the
+probability that an event occurring at time t is of type i, then  
+![](graphs/poiss18.png)  
+
+#### **Example** (HIV-Aids) 
+
+one of the difficulties in tracking the number
+of HIV infected people is its long incubation time, that is an infected
+person does not show any symptoms for a number of years, but is capable
+of infecting others.  
+Let us suppose that individuals contract HIV according to a Poisson
+process with unknown rate λ. Suppose that the incubation time until
+symptoms appear is a rv with cdf G, which is known, and suppose
+incubation times are independent. Let N~1~(t) be the number of
+individuals that have shown symptoms at time t, and let N~2~(t)
+be the number that have contracted HIV at time t but not yet shown
+symptoms. An individual that contracts HIV at time s will show symptoms
+at time t with probability G(t-s), so it follows from the above
+proposition that  
+![](graphs/poiss19.png)  
+say we know the number of individuals with system as time t is
+n~1~, then  
+![](graphs/poiss20.png)  
+for example if t=16 years, μ=10 years and n~1~=220,000, then
+n~2~=219,00

@@ -1,0 +1,85 @@
+---
+title: ESMA 6789 Stochastic Processes
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+
+**Chapter 0:&nbsp;General**
+
+0.1&nbsp;&nbsp;[Esma6789.pdf](esma6789.pdf)
+
+0.2&nbsp;&nbsp;[Syllabus](syl.html)
+
+0.3&nbsp;&nbsp;[Homeworks and Exams](assign.html)
+
+**Chapter 1:&nbsp;Probability**
+
+1.1&nbsp;&nbsp;[Basics of Probability Theory](probability.html)
+
+1.2&nbsp;&nbsp;[Random Variables and Random Vectors](probability1.html)
+
+1.3&nbsp;&nbsp;[Expectation of R.V.'s](probability2.html)
+
+1.4&nbsp;&nbsp;[Some Standard Random Variables](probability3.html)
+
+1.5&nbsp;&nbsp;[Functions of a R.V. - Transformations](probability4.html)
+
+1.6&nbsp;&nbsp;[Inequalities and Limit Theorems](probability5.html)
+
+1.7&nbsp;&nbsp;[Stochastic Processes - General Comments](stochastic.html)
+
+**Chapter 2:&nbsp;Poisson Process and Renewal Theory**
+
+2.1&nbsp;&nbsp;[Poisson Process](poiss.html)
+
+2.2&nbsp;&nbsp;[Generalizations of Poisson Process](poiss1.html)
+
+2.3&nbsp;&nbsp;[Renewal Theory](renew.html)  
+
+**Chapter3:&nbsp;Markov Chains and Markov Processes**
+
+3.1&nbsp;&nbsp;[Discrete - time Markov Chains](mark1.html)  
+
+3.2&nbsp;&nbsp;[Examples of Discrete - time Markov Chains](mark1a.html)  
+
+3.3&nbsp;&nbsp;[Continuous-time Markov Chains](mark2.html)  
+
+
+**Chapter 4:&nbsp;Other Stochastic Processes**
+
+4.1&nbsp;&nbsp;[Martingales](martingales.html)  
+
+4.2&nbsp;&nbsp;[Brownian Motion](brown.html)  
+
+4.3&nbsp;&nbsp;[Stochastic Differential Equations](sde.html)
+
+4.4&nbsp;&nbsp;[Sationary Processes and Ergodic Theory](ergodic.html)  
+
+4.5&nbsp;&nbsp;[Queuing Systems](queue.html)
+
+**Chapter 5: Simulating Stochastic Processes**
+
+5.1&nbsp;&nbsp;[Introduction to R](r2.html)  
+
+5.2&nbsp;&nbsp;[Useful R commands](r.html)  
+
+5.3&nbsp;&nbsp;[Standard Methods](accrej.html)   
+
+5.4&nbsp;&nbsp;[MCMC Methods](mcmc.html)
+

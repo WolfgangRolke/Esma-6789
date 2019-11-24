@@ -1,0 +1,273 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans
+---
+
+   
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Some Standard Random Variables
+
+
+### Bernoulli Distribution
+
+A r.v. X is said have a Bernoulli distribution with success parameter p
+if P(X=0)=1-p and P(X=1)=p.  
+Note: often you see q = 1-p used  
+Shorthand: X ~ Ber(p)  
+EX = 0q+1p = p  
+EX^2^ = 0^2^q+1~2~p = p, so V(X) =
+EX~2~-(EX)^2^ = p-p^2^ = pq
+
+### Binomial Distribution
+
+Say X~1~, ... , X~n~ ~ Ber(p),
+X~i~$\perp$X~j~ $\forall$  i≠j, then X =
+∑X~i~ is said to have a Binomial distribution with parameters n
+and p. We have  
+![](graphs/prob31.png)
+
+#### **Example** 
+
+A company wants to hire 5 new employees. From previous
+experience they know that about 1 in 10 applicants are suitable for the
+jobs. What is the probability that if they interview 20 applicants they
+will be able to fill those 5 positions?  
+Consider each interview a "trial" with the only two possible outcomes:
+"success" (can be hired) or "failure" (not suitable). Assumptions:  
+1) "success probability" is the same for all applicants (as long as we
+know nothing else about them the probability is 1/10 for all of them)  
+2) trials are independent (depends somewhat on the setup of the
+interviews but should be ok)  
+then if we let X = "\#number of suitable applicants in the group of 20"
+we have X~B(20,0.1) and so  
+  
+![](graphs/prob32.png)
+
+### Geometric Distribution
+
+Say X~1~, X~2~, .. are iid Ber(p) and let Y be the
+number of trials needed until the first success. Then Y is said to have
+a geometric distribution with rate p and we have  
+![](graphs/prob33.png)
+
+
+#### **Example** 
+
+
+How many applicants will the company need to
+interview to be 90% sure to be able to fill at least one of the five
+positions?  
+if we let Y be the number of trials until the first success (= an
+applicant is suitable) we have Y~G(0.1). Then  
+![](graphs/prob34.png)
+
+### Negative Binomial Distribution
+
+Despite the different name this is actually a generalization of the
+geometric, namely where Y is the number of trials needed until the
+r^th^ success.  
+![](graphs/prob35.png)  
+
+#### **Example**
+
+How many applicants will the company need to
+interview to be 90% sure to be able to fill all of the five positions?  
+if we let Y be the number of trials until the 5^th^ success we
+have Y~NB(0.1,5). Doing the calculations by hand is rather ugly, because
+of the binomial coefficients. Using a computer program we can find the
+answer to be 78. (Note: it is not 5\*20=100!)
+
+### Hypergeometric Distribution
+
+Consider an urn containing N+M balls, of which N are white and M are
+black. If a sample of size n is chosen at random and if X is the number
+of white balls chosen, then X has a hypergeometric distribution with
+parameters (n,N,M).  
+![](graphs/prob36.png)
+
+#### **Example** 
+
+say our company has a pool of 100 candidates for the job, 10
+of whom are suitable for hiring. If they interview 50 of the 100, what
+is the probability that they will fill the 5 positions?  
+Here X~HG(50,10,90) and so P(X≥5) = 1- P(X≤4) = 1 - 0.3703 = 0.6297  
+Again doing this by hand is not advisable!
+
+Note: the difference between the binomial and the hypergeometric
+distribution is that here we draw the balls **without repetition**. Of
+course, if n is small compared to N+M the probability of drawing the
+same ball twice is (almost) 0, so then the two distributions give
+(almost) the same answer.
+
+### Poisson Distribution
+
+A random variable X is said to have a Poisson distribution with rate λ
+if  
+![](graphs/prob37.png)
+
+One way to visualize the Poisson distribution is as follows say X ~
+B(n,p) such that n is large and p is small. That is the number of trials
+is large but the success probability is small. Then X is approximately
+Poisson with rate λ = np.
+
+#### **Example**
+
+say you drive from Mayaguez to San Juan. Assume that the
+probability that on one kilometer of highway there is a police car
+checking the speed is 0.04. What is the probability that you will
+encounter at least 3 police cars on your drive?  
+If we assume that the police cars appear independently (?) then X = \#
+of police cars ~ B(180,0.04), so P(X≥3) = 1 - P(X≤2) = 1 - 0.0234 =
+0.9766. One the other hand X is also approximately P(180\*0.04) = P(7.2)
+and so P(X≥3) = 1 - P(X≤2) = 1 - 0.0254 = 0.9746.
+
+### Multinomial Distribution
+
+This is an example of a discrete random vector. It is also a
+generalization of the Binomial. Consider an experiment having a total of
+r possible outcomes, with corresponding probabilities p~1~, ..,
+p~r~. Now perform independent replications of this experiment
+and let X~i~ record the number of times the i^th^
+outcome is observed in the n trials. Then (X~1~, ..,
+X~r~) has a multinomial distribution with parameters n,
+p~1~, .., p~r~. We have  
+![](graphs/prob38.png)
+
+------------------------------------------------------------------------
+
+Next we have a look at some continuous distributions:
+
+### Uniform Distribution
+
+X is said to have a uniform distribution on the interval [A,B] if  
+
+![](graphs/prob39.png)
+
+### Exponential Distribution
+
+X is said to have an exponential distribution rate λ if 
+
+![](graphs/prob310.png)
+
+The exponential random variable has an interesting (and for a continuous
+r.v. unique!) property - called the memoryless property:
+
+**Proposition**
+
+X has an exponential distribution iff X is a positive continuous r.v.
+and P(X&gt;s+t | X&gt;s) = P(X&gt;t) for all s,t &gt; 0.
+
+**Proof** Assume X~E(λ). Then  
+![](graphs/prob311.png)
+
+To do the revers assume X is continuous with density f and P(X&gt;s+t |
+X&gt;s) = P(X&gt;t) for all s,t &gt; 0. In the proof above we saw that
+this implies P(X&gt;s+t)=P(X&gt;s)\*P(X&gt;t). Let h(x) = P(X&gt;x) and
+let $\epsilon>0$. Note h(0) = P(X&gt;0) = 1 because X is positive.  
+![](graphs/prob312.png)  
+and so we see X~E(β)
+
+### The Gamma Distribution
+
+Recall the gamma function:  
+![](graphs/prob313.png)  
+The gamma function is famous for many things, among them the
+relationship Γ(α+1) = α Γ(α) which implies Γ(n)=(n-1)!. Also, we have
+Γ^2^(1/2) = π
+
+Now X is said have a gamma distribution (X~Γ(α,β)) with parameters (α,β)
+if  
+![](graphs/prob314.png)
+
+By definition we have X&gt;0, and so the Gamma is the basic example of a
+r.v. on [0,∞], or a little more general (using a change of variables)
+on any open half interval
+
+Note if X~Γ(1,β) then X~E(1/β).
+
+Another important special case is if X~Γ(n/2,2), then X is called a
+Chi-square r.v. with n degrees of freedom, denoted by $X\sim \chi(n)$.
+
+There is an important connection between the gamma and the Poisson
+distributions:  
+If X~Γ(n,β) and Y~P(x/β) then  
+P(X≤x) = P(Y≥n)
+
+### The Beta Distribution
+
+X is said to have a beta distribution with parameters α and β
+(X~Beta(α,β)) if  
+![](graphs/prob315.png)
+
+By definition we have 0&lt;X&lt;1, and so the Beta is the basic example
+of a r.v. on [0,1], or a little more general (using a change of
+variables) on any finite interval.
+
+Special case: Beta(1,1) = U[0,1]
+
+Let's go back to the gamma distribution for a moment. Say X and Y are
+independent Γ(α,β) and let Z=X+Y. Then  
+![](graphs/prob316.png)  
+so we see that Z~Γ(2a,β). In other words, the sum of independent gamma
+r.v.'s is again Gamma.
+
+Some special cases:  
+1) X,Y iid E(λ) then X+Y~Γ(2,λ) (and **not** exponential)  
+2) X,Y iid $\chi(n)$, then $X+Y\sim \chi(2n)$
+
+### The Normal (Gaussian) Distribution
+
+X is said to have a normal distribution with mean μ and variance $\sigma^2$ (X~N(μ,$\sigma$)) if it has density  
+![](graphs/prob317.png)  
+Of course we have EX=μ and V(X)=$\sigma$^2^  
+
+**Careful**: some papers and textbooks define the normal as
+X~N(μ,$\sigma^2$), that is they use the variance instead of the standard deviation.
+
+We also have the following interesting features:  
+1) If X ~ N(μ~X~,$\sigma$~X~) and
+Y~N(μ~Y~,$\sigma$~Y~) then  
+
+$$Z = X + Y \sim
+N(\mu_X+\mu_Y,\sqrt{\sigma_X^2+\sigma_Y^2+2\sigma_X\sigma_Y\rho})$$
+
+where ρ = cor(X,Y)  
+2) if cov(X,Y) = 0 then X and Y are independent  
+3) P(X&gt;μ) = P(X&lt;μ) =1/2  
+4) P(X&gt;μ+x) = P(X&lt;μ-x)  
+5) say X~N(μ,$\sigma$) then  
+
+![](graphs/prob318.png) 
+
+**Proposition**
+
+Say $X\sim N(μ,\sigma)$ then the mgf of X exists $\forall t$ 
+and is given by $\psi$(t) = exp{μt+½$\sigma$^2^t^2^}
+
+**Proof** First we deal with the case of a standard normal Z~N(0,1):  
+![](graphs/prob322.png)  
+Now we have  
+
+$$
+\begin{aligned}
+&\psi_X(t)    = \psi_{\sigma Z+t}(t)=\\
+&\psi_Z(\sigma t)e^{\mu t}    = \\
+&\exp\{\mu t+\frac12 \sigma^2 t^2 \}    = \\
+\end{aligned}
+$$

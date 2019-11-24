@@ -1,0 +1,164 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Queuing Systems
+
+Consider an ATM machine: at various times people arrive at the machine. If there is nobody there they begin their work, if some others are already there they get in line and wait for their turn.
+
+Any process similar to this is called a *queuing system*. In general it is described by
+
+-  how often does a person arrive  
+-  how long does it take to do the work  
+-  how many serves are there
+
+Formally a G/G/k system has people arriving according to a distribution G (first G), the time it takes to do the job is has distribution (second) G and there are k servers.
+
+An important special case is a **M/M/1 queue**, where there is on server and both arrivals and serving times have an exponential distribution with rates $\lambda$ and $\mu$, respectively. Let {X~t~; t>0} be the number of people in the system, then {X~t~; t>0} is continuous-time Markov chain with state-space {0, 1, 2, ..}, which explains the use of M!
+
+One of the main ideas in the analysis of a queuing system is the following: let 
+
+-  a~n~ be the proportion of customers that arrive at the station and find n other customers there.
+
+-  b~n~ be the proportion of customers that leave the station and leave n other customers there.
+
+We have
+
+**Lemma**
+
+If customers arrive one at a time we have
+
+$$a_n=b_n; n \ge 0$$
+
+**proof** (almost) obvious
+
+Let p~n~ be the long-run probability that there are n people in the system. So p~0~ is the probability that you get there and can immediately start to work with the server. 
+
+With this we find:
+
+**Lemma**
+
+If people arrive according to a Poisson process, we have $p_n=a_n$.
+
+**proof** this is a direct consequence of the independent and stationary increments property.
+
+Consider the state 0. When a change occurs it is either that the system enter this state from 1 because a customers has finished the work, which happens at rate $\mu$, or because the system is leaving the sate 0 because a customer has arrived, which happens with rate $\lambda$. Therefore we have
+
+$\lambda p_0 = \mu p_1$
+
+By the same reasoning we have for any state n>0
+
+$(\lambda +\mu)p_{n} = \lambda p_{n-1}+\mu p_{n+1}$
+
+These are the so-called *balance equations*, which often form the basis of the analysis of a queuing system.
+
+Now
+
+$$
+\begin{aligned}
+&p_0=p_0 \\
+&p_1 =\frac\lambda\mu p_0\\
+&p_2-p_1= \frac\lambda\mu(p_1-p_0)=\frac\lambda\mu(\frac\lambda\mu-1)p_0    \\
+&p_2= \frac\lambda\mu(p_1-p_0)+p_1 = \frac\lambda\mu(\frac\lambda\mu p_0-p_0)+\frac\lambda\mu p_0=(\frac\lambda\mu)^2p_0 \\
+&p_n=(\frac\lambda\mu)^np_0 
+\end{aligned}
+$$
+
+and
+
+$$
+\begin{aligned}
+&1    =\sum_{n=0}^\infty p_n =  \\
+&\sum_{n=0}^\infty  (\frac\lambda\mu)^np_0  = \\
+&p_0 \frac1{1-\frac\lambda\mu}  
+\end{aligned}
+$$
+if $\lambda<\mu$ and $\infty$ otherwise. So
+
+$$p_n=(1-\frac\lambda\mu)(\frac\lambda\mu)^n$$
+
+The fact that p~n~ does not exist if $\lambda> \mu$ makes sense because then the queue will keep on getting bigger.
+
+Notice that if $Y\sim Geom(1-\lambda/\mu)$, then $p_n=P(Y=n+1)$
+
+Let L be the expected number of people in the queue, then
+
+$$
+\begin{aligned}
+&L   =\sum_{n=0}^\infty np_n = \\
+&\sum_{n=0}^\infty nP(Y=n+1)    = \\
+&\sum_{n=0}^\infty (n+1-1)P(Y=n+1)    = \\
+&\sum_{n=0}^\infty (n+1)P(Y=n+1)-\sum_{n=0}^\infty P(Y=n+1)    = \\
+&E[Y]+1=\frac1{1-\lambda/\mu}-1=\frac\lambda{\mu-\lambda}
+\end{aligned}
+$$
+
+Let W be the expected wait time of a customer, then it can be shown that $W=L/\lambda=\frac1{\mu-\lambda}$
+
+Let W~Q~ be the expected time waiting in line, then
+
+$$W_Q=W-E[S]=\frac1{\mu-\lambda}-\frac1\mu=\frac\lambda{\mu(\mu-\lambda)}$$
+
+Let L~Q~ be the average number of people in line. Again it can be shown that 
+
+$$L_Q=\lambda W_Q=\frac{\lambda^2}{\mu(\mu-\lambda)}$$
+
+#### **Example**
+
+Say a bank knows that customers arrive at an ATM machine at a rate of 1 every 5 minutes. What does the service rate have to be so that the average number of people in line is less than 3?  
+
+$$
+\begin{aligned}
+&L_Q<3 = \\
+&\lambda W_Q=\frac{\lambda^2}{\mu(\mu-\lambda)}<3   = \\
+&\lambda^2<3\mu(\mu-\lambda)  \\
+&3\mu^2-3\lambda\mu-\lambda^2>0\\
+&\mu_{1,2}=(3\lambda\pm\sqrt{9\lambda^2-4\times3\times(-\lambda^2)})/6=\\
+&(1/2\pm\sqrt{21}/6)\lambda\\
+&\mu=1.26\lambda=1.26\times12=15.12
+\end{aligned}
+$$
+
+so the service rate needs to be at most 1 in 60/15.12=3.97 minutes.
+
+Let Z be the time a randomly chosen customer spends in the system. Let's find the distribution of Z. Let X be the number of people in the system when the customer arrives, then
+
+$$
+F(z) = P(Z<z) = \sum_{n=0}^\infty P(Z<z|X=n)P(X=n) 
+$$
+
+Now if there is no one in the system when he arrives the time is just the time he spends being serviced, which is exponential $\mu$. If there are n people in line his waiting time is the waiting time of the person being attended to plus the waiting times for the n-1 people in line before him. Those have an exponential distribution rate $\mu$, as does his own service time. 
+
+How about the person being attended to? By the memoryless property of the exponential his waiting time is also exponential with rate $\mu$, and so the total waiting time of our customer has the distribution of the sum  of n independent exponentials, and therefore is $\Gamma(n+1, \mu)$.
+
+Therefore
+
+$$
+\begin{aligned}
+&P(Z<z|X=n) =\int_0^z \mu e^{-\mu t}\frac{(\mu t)^n}{n!}dt  \\
+&P(Z<z)   = \\
+&\sum_{n=0}^\infty   \int_0^z \mu e^{-\mu t}\frac{(\mu t)^n}{n!}dt(\frac\lambda\mu)^n(1-\frac\lambda\mu)= \\
+&\int_0^z \left(\sum_{n=0}^\infty (\lambda t)^n/n!  \right)e^{-\mu t}(1-\frac\lambda\mu)\mu dt =\\
+&\int_0^z  (\mu-\lambda)e^{(\lambda-\mu) t}  dt =\\
+&1-e^{(\lambda-\mu) t}
+\end{aligned}
+$$
+
+so the time a customer spends in the system has an exponential distribution with rate $\mu-\lambda$.

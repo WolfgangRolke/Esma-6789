@@ -1,0 +1,512 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Expectations of Random Variables and Random Vectors
+
+### Expectation and Variance
+
+
+**Definition**
+
+The expectation (or expected value) of a random variable g(X) is defined
+by  
+![](graphs/prob21.png)
+
+#### **Example** 
+
+Say X is the sum of two dice. What is EX? What is
+EX^2^
+
+we have
+
+```{r echo=FALSE}
+tbl <- source("tables/probability2.R")[[1]][[1]]
+#colnames(tbl) <- c("X.Y", paste0(0:5," "))
+kable.nice(tbl, do.row.names = FALSE)
+```
+
+so
+
+EX=2×1/36+3×2/36+4×3/36+5×4/36+6×5/36+7×6/36+8×5/36+9×4/36+10×3/36+11×2/36+12×3/36
+= 7
+
+EX^2^=2^2^×1/36+3^2^×2/36+4^2^×3/36+5^2^×4/36+6^2^×5/36+7^2^×6/36+8^2^×5/36+9^2^×4/36+10^2^×3/36+11^2^×2/36+12^2^×3/36
+= 54.83
+
+#### **Example** 
+
+we roll fair die until the first time we get a six. What
+is the expected number of rolls?  
+We saw that f(x) = 1/6\*(5/6)^x-1^ if
+x$\in$ {1,2,..}. Here we just have g(x)=x, so  
+![](graphs/prob22.png)  
+How do we compute this sum? Here is a "standard" trick:  
+![](graphs/prob23.png)  
+and so we find  
+![](graphs/prob24.png)
+
+This is a special example of a **geometric rv**, that is a discrete rv X
+with density f(x)=p(1-p)^x-1^, x=1,2,.. Note that if we replace 1/6
+above with p, we can show that  
+![](graphs/prob238.png)
+
+#### **Example** 
+
+
+X is said to have a uniform [A,B] distribution if
+f(x)=1/(B-A) for A&lt;x&lt;B, 0 otherwise. We denote a uniform [A,B]
+rv by X~U[A,B}  
+Find EX^k^ (this is called the k^th^ moment of X).  
+![](graphs/prob25.png)
+
+some special expectations are the **mean** of X defined by
+
+μ=EX
+
+and the **variance** defined by
+
+σ^2^ = Var(X) = E(X-μ)^2^
+
+Related to the variance is the **standard deviation** σ, the square root
+of the variance.
+
+**Proposition**
+
+![](graphs/prob26.png)
+
+**Proposition**
+
+Let X and Y be rv's and g and h functions on $\mathbb{R}$. Then if
+X$\perp$Y we have  
+  
+Eg(X)h(Y) = Eg(X)×Eh(Y)  
+
+There is a useful way to"link" probabilities and expectations is via the
+indicator function I~A~ defined as  
+![](graphs/prob212.png)  
+because with this we have for a continuous r.v. X with density f:  
+![](graphs/prob213.png)
+
+### Covariance and Correlation
+
+**Definition**
+
+The covariance of two r.v. X and Y is defined by
+
+cov(X,Y)=E[(X-μ~X~)(Y-μ~Y~)]  
+  
+The correlation of X and Y is defined by
+
+cor(X,Y)=cov(X,Y)/(σ~X~σ~Y~)
+
+Note cov(X,X) = Var(X)
+
+**Proposition**
+
+cov(X,Y) = E(XY) - (EX)(EY)
+
+#### **Example** 
+
+take the example of the sum and absolute value of the
+difference of two rolls of a die. What is the covariance of X and Y?  
+We have  
+
+```{r echo=FALSE}
+tbl1 <- source("tables/probability1.R")[[1]][[1]]
+colnames(tbl1) <- c("X.Y", paste0(0:5," "))
+kable.nice(tbl1, do.row.names = FALSE)
+```
+
+so
+
+μ~X~ = EX = 2\*1/36 + 3\*2/36 + ... + 12\*1/36 = 7.0  
+μ~Y~ = EY = 0\*6/36 + 1\*12/36 + ... + 5\*2/36 = 70/36  
+EXY = 0\*2\*1/36 + 1\*2\*0/36 + .2\*2\*0/36.. + 5\*12\*0/36 = 490/36  
+and so cov(X,Y) = EXY-EXEY = 490/36 - 7.0\*70/36 = 0
+
+Note that we previously saw that X and Y are **not** independent, so we
+here have an example that a covariance of 0 does **not** imply
+independence! It does work the other way around, though:
+
+**Proposition**
+
+If X and Y are independent, then cov(X,Y) = 0
+
+#### **Example** 
+
+say the rv (X,Y) has joint density f(x,y)=c if
+0&lt;x&lt;y&lt;1, 0 otherwise. Find the correlation of X and Y.
+
+We have previously done a more general problem (with
+0&lt;x&lt;y^p^&lt;1) and saw there that c=p+1=2 and
+f~Y~(y)=2y, 0&lt;y&lt;1. Now
+
+![](graphs/prob240.png)
+
+**Proposition**
+
+Var(X+Y) = VarX + VarY + 2Cov(X,Y)  
+  
+and if X$\perp$Y then
+
+Var(X+Y) = VarX + VarY
+
+------------------------------------------------------------------------
+
+This formula is the basis of what are called variance-reduction methods.
+If we can find a rv Y which is negatively correlated with X then the
+variance of X+Y might be smaller than the variance of X alone.
+
+The above formulas generalize easily to more than two random variables
+
+**Proposition**
+
+Let X~1~, .., X~n~ be rv, then  
+![](graphs/prob121.png)
+
+#### **Example** (The Matching Problem)  
+  
+At a party n people put their hats in the center of the room where the
+hats are mixed together. Each person then randomly selects a hat. We are
+interested in the mean and the variance of of the number people who get
+their own hat.  
+Let this number be X, and let's write X =
+X~1~+..+X~n~, where X~i~ is 1 if the
+k^th^ person selects their own hat and 0 if they do not.  
+Now the i^th^ person is equally likely to select any of the n
+hats, so P(X~i~=1)=1/n, and so  
+  
+EX~i~ = 0×(n-1)/n +1×1/n =1/n  
+  
+There is an even simpler way of doing this: X~i~ is an
+indicator rv, and so EX~i~ = P(X~i~=1) = 1/n  
+For the variance we have  
+  
+EX~i~^2^ = 0^2^×(n-1)/n +1^2^×1/n
+=1/n
+
+and so  
+  
+VarX~i~ = EX~i~^2^ -
+(EX~i~)^2^ = 1/n - (1/n)^2^ =
+(n-1)/n^2^.  
+  
+Also  
+  
+EX~i~X~j~ = P(X~i~×X~j~=1) =  
+P(X~i~ = 1, X~j~=1) =  
+P(X~i~ = 1) × P(X~j~=1|X~i~=1) =  
+1/n × 1/(n-1)  
+  
+again because X~i~X~j~ is an indicator rv. So  
+  
+Cov(X~i~X~j~) =  
+  
+EX~i~X~j~ - EX~i~×EX~j~ =  
+  
+1/n(n-1) - (1/n)^2^ =
+
+1/n^2^(n-1)  
+  
+Finally
+
+EX = E(X~1~+..+X~n~) =
+EX~1~+..+EX~n~ = n×1/n =1  
+  
+and  
+![](graphs/prob222.png)  
+It is interesting to see that E[X] = Var(X) =1, independent of n!
+Let's make sure we got this right and check a few simple cases:
+
+n=1: there is just one person and one hat, so P(X=1)=1, so E[X]=1, but
+Var(X) = E[(X-1)^2^]=0, so actually something is wrong
+
+What is it?
+
+How about n=2? now there are two people and they either both get their
+hats or neither does (they get each others hats). So
+
+P(X~1~=0,X~2~=0) = P(X~1~=1,X~2~=1)
+= 1/2
+
+P(X~1~=0,X~2~=1) = P(X~1~=0,X~2~=1)
+= 0
+
+so
+
+E[X~1~+X~2~] = 2\*P(X~1~=1,X~2~=1)
+= 2\*1/2 = 1
+
+E[(X~1~+X~2~)^2^] =
+2^2^\*P(X~1~=1,X~2~=1) = 4\*1/2 = 2
+
+Var(X~1~+X~2~) =
+E[(X~1~+X~2~)^2^] -
+E[X~1~+X~2~]^2^ = 2-1^2^ = 1
+
+------------------------------------------------------------------------
+
+### Conditional Expectation
+
+Say X|Y=y is a conditional r.v. with density (pdf) f~X|Y=y~. As was
+stated earlier, conditional rv's are also just rv's, so they have
+expectations as well, given by  
+  
+![](graphs/prob216.png)
+
+We can think of π(y) = E[X|Y=y] as a function of y, that is if we know
+the joint density f(x,y) then for a fixed y we can compute π(y). But y
+is the realization of the random variable Y, so Z = π(Y) = E[X|Y] is a
+random variable as well.
+
+Remember we do not have an object "X|Y", only "X|Y=y", but now we do
+have an object E[X|Y]
+
+#### **Example** 
+
+An urn contains 2 white and 3 black balls. A random sample
+of size 2 is chosen. Let X be denote the number of white balls in the
+sample. An additional ball is drawn from the remaining six. Let Y equal
+1 if the ball is white and 0 otherwise.  
+For example f(0,0) = P(X=0,Y=0) = 3/5\*2/4\*1/3 = 1/10. the complete density
+is given by:  
+
+```{r echo=FALSE}
+tbl <- source("tables/probability2.R")[[1]]
+kable.nice(tbl[[2]], do.row.names = FALSE)
+```
+
+
+
+The marginals are given by  
+
+
+```{r echo=FALSE}
+kable.nice(tbl[[3]], do.row.names = FALSE)
+```
+
+and  
+
+
+```{r echo=FALSE}
+kable.nice(tbl[[4]], do.row.names = FALSE)
+```
+
+
+The conditional distribution of X|Y=0 is  
+
+```{r echo=FALSE}
+kable.nice(tbl[[5]], do.row.names = FALSE)
+```
+
+and so E[X|Y=0] = 0\*1/6+1\*2/3+2\*1/6 = 1.0
+
+The conditional distribution of X|Y=1 is  
+```{r echo=FALSE}
+kable.nice(tbl[[6]], do.row.names = FALSE)
+```
+
+  
+and so E[X|Y=1] = 0\*1/2+1\*1/2+2\*0 = 1/2
+
+Finally the conditional r.v. Z = E[X|Y] has density
+```{r echo=FALSE}
+kable.nice(tbl[[7]], do.row.names = FALSE)
+```
+
+  
+with this we can find E[Z] = E[E[X|Y]] = 1\*3/5+1/2\*2/5 = 4/5
+
+**Theorem**
+
+E[X] = E[E[X|Y]]  
+  
+and
+
+Var(X) = E[Var(X|Y)] + Var[E(X|Y)]
+
+#### **Example** above  
+  
+We found EZ = E[EX|Y]] = 4/5. Now E[X] = 0\*3/10 + 1\*3/5 + 2\*1/10
+= 4/5
+
+#### **Example** 
+
+Let's go back to the example above, where we had a
+continuous rv with joint pdf f(x,y) = 6x, 0≤x≤y≤1, 0 otherwise  
+![](graphs/prob218.png)  
+Now  
+![](graphs/prob219.png)  
+and  
+![](graphs/prob220.png)
+
+#### **Example** 
+
+Let's have another look at the hat matching problem. Suppose
+that those choosing their own hats leave, while the others put their
+hats back into the center and do the exercise again. This process
+continuous until everybody has his or her own hat. Find
+E[R~n~], where R~n~ is the number of rounds
+needed.  
+  
+Given that in each round on average one person gets their own hat and
+then leaves, we might suspect that E[R~n~]=n. Let's proof
+this by induction on n.  
+  
+Let n=1, that is there is just one person, and clearly they pick up
+their own hat, so E[R~n~]=1  
+  
+Assume E[R~k~]=k $\forall$ k&lt;n. Let M be the
+number of matches that occur in the first round. Clearly
+M$\in$  {0,1, .. ,n}  
+  
+![](graphs/prob226.png)  
+and we are done.
+
+Note that we solved this problem without ever finding P(M=0), which is
+also a non-trivial problem. Here is how it is done:  
+  
+Of course the probability depends on n, so let's use the notation
+
+p~n~ =P(M=0 | there are n people)
+
+We will condition on whether or not the first person selects their own
+hat. Call the event "first person selects their own hat" E. Then  
+  
+p~n~ = P(M=0) = P(M=0|E)P(E) +
+P(M=0|E^c^)P(E^c^)  
+  
+Now
+
+P(M=0|E)=0
+
+because E means at least one person got their own hat, and so  
+  
+p~n~ = P(M=0|E^c^)(n-1)/n  
+  
+E^c^ means the first person selects a hat that does not belong
+to them. So now there are n-1 hats in the center, one of which belongs
+to the first person. There are still n-1 people to pick hats, one of
+which has no hat in the center because the first person took it.  
+  
+So P(M=0|E^c^) is the probability of no matches when n-1 people
+select from a set of n-1 hats that does not contain the hat of one of
+them. This can happen in either of two mutually exclusive ways:  
+  
+• there are no matches and the extra person does not select the extra
+hat. This has probability p~n-1~. (think of the extra hat as to
+belong to the extra person)  
+  
+• there are no matches and the extra person does select the extra hat.
+This has probability 1/(n-1)p~n-2~ because the extra person
+needs to choose the extra hat (1/n-1), and then there are n-2 people and
+their n-2 hats left.
+
+So now we have  
+  
+P(M=0|E^c^) = p~n-1~ + 1/(n-1)p~n-2~ and  
+p~n~ = (n-1)/np~n-1~ + 1/np~n-2~
+
+  
+This is called a recursive relationship. We can solve it via induction
+as follows:  
+  
+![](graphs/prob227.png)  
+so no matter how many people are present, there is always 63% chance of
+somebody getting their own hat.
+
+------------------------------------------------------------------------
+
+### Moment Generating and Characteristic Functions
+
+**Definition**
+
+1) The moment generating function of a rv X is defined by ψ(t) =
+E[e^tX^]  
+2) The characteristic function of a rv X is defined by Φ(t) =
+E[e^itX^]
+
+#### **Example** 
+
+Let X be 1 with probability p and 0 with probability q=1-p.
+Find ψ(t)  
+  
+ψ(t) = E[e^tX^] = e^t0^q + e^t1^p =
+q+e^t^p  
+  
+X is called a Bernoulli rv. with success parameter p, denoted by
+X~Ber(p)
+
+#### **Example** 
+
+Say X~Exp(λ). Find ψ(t)
+
+![](graphs/prob228.png)
+
+which explains the name moment generating function, although actually
+finding moments in this way is like killing a fly with a cannon! The
+main usefulness of moment generating functions is as a tool for proving
+theorems, and usually uses the following
+
+**Proposition**
+
+1) Let X~1~, .., X~n~ be independent random variables,
+with pdf's (density's) f~1~(x), ..,f~n~(x). Let
+X=∑X~i~. Then  
+![](graphs/prob229.png)  
+2) If in addition all the distributions are the same then  
+![](graphs/prob233.png)
+
+If X~1~, .., X~n~ are independent random variables
+with the same pdf (density) f we say X~1~, .., X~n~ are
+iid.
+
+#### **Example**
+
+Say X~1~, .., X~n~ are iid Ber(p). Let
+X=∑X~i~, then  
+![](graphs/prob234.png)
+
+**Theorem**
+
+If ψ(t) exists in an open neighborhood of 0, then it determines f.
+
+**Proof** much to complicated for us.
+
+#### **Example** 
+
+A discrete rv. X is said to have a Poisson distribution with
+rate λ if it has density f(x) = (λ^x^/x!)e^-λ^, x=0, 1, 2,
+... Now  
+![](graphs/prob235.png)  
+Say X~1~, .., X~n~ are iid Poisson rate λ, then  
+![](graphs/prob236.png)  
+but this is again the moment generating function of a Poisson rv, this
+one with rate nλ. So by the uniqueness theorem we have shown that
+∑X~i~ has a Poisson distribution with rate nλ.
+
+**Proposition**
+
+Let X be a rv with mgf ψ(t). Then Y=aX+b has mgf
+ψ~Y~(at)e^bt^
+
+**Proof**  
+![](graphs/prob237.png)

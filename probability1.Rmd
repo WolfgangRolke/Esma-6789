@@ -1,0 +1,336 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+## Random Variables
+
+
+**Definition**
+
+A **random variable** (r.v.) X is set-valued function from the sample
+space into $\mathbb{R}$. For any set of real numbers
+A$\subset \mathbb{R}$ we define the probability
+P(X$\in$ A) = P(X^-1^(A)), where
+X^-1^(A) is the set of all points in S such that X maps the
+points into A.
+
+#### **Example** 
+
+Say we flip a fair coin three times. Let X be the number of
+"heads" in these three flips.  
+  
+Now S=({H,H,H}, (H,H,T), .., (T,T,T)}.
+
+X maps S into $\mathbb{R}$, for example X((H,H,H))=3 and
+X((H,H,T))=2.
+
+What is P(X=2)?
+
+P(X=2) = P(X^-1^(2)) = P( all the outcomes in S that are mapped
+onto 2 ) = P({(H,H,T), (H,T,H), (T,H,H)} = 3/8
+
+------------------------------------------------------------------------
+
+There are some technical difficulties when defining a r.v. on a sample
+space like $\mathbb{R}$, it turns out to be impossible to define it
+for every subset of $\mathbb{R}$ without getting logical
+contradictions. In some (mathematically precise) sense there are too
+many subsets of $\mathbb{R}$. The solution is to define a
+**σ-algebra** on the sample space and then define X only on that
+σ-algebra. We will ignore these technical difficulties.
+
+There are two basic types of r.v.'s:
+
+**Definition**
+
+If X takes countably many values, X is called a **discrete** r.v.  
+  
+If X takes uncountably many values, X is called a **continuous** r.v.
+
+Almost everything to do with r.v.'s has to be done twice, once for
+discrete and once for continuous r.v.'s. This separation is only
+artificial, it goes away once a more general definition of "integral" is
+used (Riemann-Stilties or Lebesgue)
+
+### (Commulative) Distribution Function
+
+
+**Definition**
+
+The (cumulative) distribution function of a r.v. X (or cdf) is defined
+by F(x) = P(X≤x) $\forall$  x $\in$ 
+$\mathbb{R}$
+
+#### **Example** 
+
+Say we roll a fair die until the first "Six" comes up. Let X
+be the number of rolls needed.  
+  
+First note X$\in$ {1,2,...}  
+  
+let A~i~ be the event "a six on the i^th^ roll",
+i=1,2,3, .... Then  
+![](graphs/prob12.png)
+
+  
+so for k≤x&lt;k+1 we have F(x)=1-(5/6)^k^  
+<img src="graphs/prob13.png" width="500" height="500" />
+
+**Proposition**
+
+Let F be the cdf of a rv X.
+
+Then
+
+1) 0≤F(x)≤1
+$\forall$ x$\in \mathbb{R}$  
+  
+2) F is non-decreasing  
+  
+3) F is right-continuous  
+  
+4) F(x)→0 as x→-∞ and F(x)→1 as x→∞
+
+**Theorem**
+
+Say F is a function with properties 1-4. Then there exists a random
+variable X which has F as its distribution function.
+
+**proof** VERY DEEP, based on Kolmogorov's extension theorem
+
+### Probability Density Functions
+
+**Definition**
+
+1) The probability density function (density, pdf) of a discrete r.v. X is defined
+by 
+
+$f(x) = P(X=x)$ $\forall  x \in \mathbb{R}$  
+  
+2) The density  f of a continuous random
+variable X is defined by
+
+$f(x) = F'(x)$
+
+where the derivative exists  
+
+#### **Example**: 
+
+Say we roll a fair die until the first "Six" comes up. Let
+X be the number of rolls needed. Then the density of X is given by
+
+f(x) = P(X=x) = 1/6\*(5/6)^x-1^ if
+x$\in$ {1,2,..}, 0 otherwise.
+
+Note that it follows from the definition and the axioms that for any density
+f we have  
+![](graphs/prob16.png)
+
+  
+#### **Example** (First "Six"):  
+f(x) = P(X=x) = 0 if x$\not\in$ {1, 2, ..}  
+f(x) = P(X=x) = 1/6\*(5/6)^x-1^ $\in$  [0,1] if
+x$\not\in$ {1, 2, ..}  
+  
+![](graphs/prob17.png)
+
+Let X be a continuous rv, then again it follows from the definition and
+the axioms that for any pdf f we have  
+![](graphs/prob18.png)
+
+#### **Example** 
+
+Let X be a continuous rv with density f(x)=λexp(-λx) if
+x&gt;0, 0 otherwise, where λ&gt;0  
+clearly f(x)≥0 for all x.  
+![](graphs/prob19.png)  
+This r.v. X is called an exponential r.v. with rate λ. We use the
+notation X~Exp(λ)
+
+#### **Example** 
+
+Let X be a continuous rv with density f(x)=cx^λ^ if
+x&gt;1, 0 otherwise, where c is a constant (which depends on λ). For
+which values of λ is this a density, and what is c?  
+![](graphs/prob120.png)  
+so it is is a density if λ&lt;-1, and then c=-(1+ λ)
+
+### Random Vectors
+
+A random vector is a multi-dimensional random variable.
+
+#### **Example**:
+
+we roll a fair die twice. Let X be the sum of the rolls and
+let Y be the absolute difference between the two roles. Then (X,Y) is a
+2-dimensional random vector. The joint density of (X,Y) is given by:
+
+```{r echo=FALSE}
+tbl <- source("tables/probability1.R")[[1]][[1]]
+colnames(tbl) <- c("X.Y", paste0(0:5," "))
+kable.nice(tbl, do.row.names = FALSE)
+```
+
+
+  
+where every number is divided by 36.
+
+all definitions are straightforward extensions of the one-dimensional
+case.
+
+#### **Example**: 
+
+for a discrete random vector we have the density
+
+f(x,y) = P(X=x,Y=y)  
+  
+f(4,0) = P(X=4, Y=0) = P({(2,2)}) = 1/36
+
+or
+
+f(7,1) = P(X=7,Y=1) = P({(3,4),(4,3)}) = 1/18
+
+### Marginal Densities
+
+**Definition**
+
+Say (X,Y) is a discrete (continuous) r.v. with joint density (pdf) f. Then
+the **marginal** density (pdf) f~X~ is given by  
+![](graphs/prob110.png)
+
+#### **Example** 
+
+For the example above we find f~X~(2) = f(2,0) +
+f(2,1) + .. + f(2,5) = 1/36 or f~Y~(3) = 6/36
+
+#### **Example** 
+
+Let (X,Y) be a continuous random vector with joint pdf
+f(x,y) = cx, 0≤x&lt;y≤1, 0 otherwise. Now  
+![](graphs/prob111.png)  
+Next we find the marginals of f:  
+![](graphs/prob112.png)  
+Note that the marginals are proper densities, for example
+f~X~(x)≥0 and  
+![](graphs/prob113.png)
+
+### Conditional Densities
+
+**Definition**
+
+Let (X,Y) be a r.v. with joint density (pdf) f(x,y). For any x such that
+f~X~(x)&gt;0 we can define the conditional rv Y|X=x.
+
+If (X,Y) is discrete we find  
+  
+P(Y=y|X=x) = P(Y=y,X=x)/P(X=x)  
+  
+so the density of Y|X=x, denoted by f~Y|X=x~(y|x) is given by  
+![](graphs/prob114.png)  
+If (X,Y) are continuous the derivation is a little harder but the same
+formula holds.
+
+#### **Example** 
+
+say (X,Y) is a discrete rv with f(x,y)=cα^-xy^
+where α&gt;1, x,y=1,2,3.. Find the conditional density's and check that they
+are proper density's  
+![](graphs/prob132.png)  
+but this is the density of a geometric rv with p=α^-x^. Moreover
+the pdf f(x,y) is symmetric in x and y, so the same calculation gives
+
+f~X|Y=y~(x|y)
+
+Note that in this calculation we did not have to find the constant c! At
+least not if we don't need to know the marginal of X.
+
+#### **Example**
+
+for the continuous rv. above find f~X|Y=y~(x|y) and
+f~Y|X=x~(y|x)  
+![](graphs/prob116.png)  
+Conditional density's and pdf's are again proper density's and pdf's, for
+example  
+  
+f~X|Y=y~(x|y) = 2x/y^2^ ≥0 for 0&lt;x&lt;y and  
+![](graphs/prob117.png)
+
+Note that a conditional density (pdf) requires a specification for a value
+of the random variable on which we condition, something like
+f~X|Y=y~ for a fixed y. An expression like f~X|Y~ is
+not defined!
+
+#### **Example**
+
+say the rv (X,Y) has joint density f(x,y)=c if
+0&lt;x&lt;y^p^&lt;1, 0 otherwise, for some p&gt;0. Find the
+conditional density of X|Y=y  
+![](graphs/prob131.png)  
+
+### Independence
+
+**Definition**
+
+Two r.v. X and Y are said to be independent iff
+
+f~X,Y~(x,y)=f~X~(x)\*f~Y~(y) for all x,y
+
+We write this here as a definition but it it actually follows
+straightforward from the definition of independence of events.
+
+#### **Example**
+
+in the discrete example above we found f(7,1) = 1/18 but
+f~X~(7)\*f~Y~(1) = 1/6\*10/36=5/108, so X and Y are
+not independent
+
+#### **Example** 
+
+For the continuous example we have  
+  
+6x = f(x,y) ≠ 6x(1-x)×3y^2^ =
+f~X~(x)\*f~Y~(y)  
+  
+so X and Y are not independent
+
+Mostly the concept of independence is used in reverse: we assume X and Y
+are independent (based on good reason!) and then make use of the
+formula:
+
+#### **Example**
+
+Say it is known that the lifetime of a light bulb has an
+exponential distribution with rate λ=1/500 days. We have 2 such
+light bulbs in a lamp. What is the probability that at least one flashbulb
+is still burning after 3 years?
+
+Let the rv (X,Y) be the lifetimes of the 2 light bulbs. Then if the
+lifetimes are independent the joint density is given by  
+![](graphs/prob118.png)
+
+Now  
+![](graphs/prob119.png)
+
+  
+By the way, do you think the assumption of independence is actually
+justified here?
+
+Notation: we will use the notation X $\perp$ Y if X and Y
+are independent

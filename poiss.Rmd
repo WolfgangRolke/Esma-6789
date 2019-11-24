@@ -1,0 +1,455 @@
+---
+title: 
+header-includes: \usepackage{color}
+                 \usepackage{float}
+                 \usepackage[utf8]{inputenc}
+output:
+   html_document: default
+   pdf_document:
+     latex_engine: xelatex
+     fig_caption: no
+mainfont: DejaVu Sans  
+---
+ 
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source("../R/setup.rmd.R", local=TRUE)
+setup.rmd(local.env=environment())
+```
+ 
+`r hl()$basefontsize()`
+`r hl()$style()`
+ 
+# Poisson Process and Renewal Theory 
+ 
+## Poisson Process
+
+### Basic Definition and Examples
+
+The Poisson process N(t) is an example of a **counting process**, that
+is N(t) is the number of times something has happened up to time t.
+Therefore N(t)∈{0,1,2..}, so it is a discrete-state space process . t
+∈[0,∞), so it has a continuous state-space.
+
+#### **Example** 
+
+Consider an ATM machine and let N(t) be the number of
+customers served by the ATM machine at time t.
+
+Because of the way it is defined every counting process has the
+following properties:  
+  
+1) N(t)≥0  
+2) N(t) is an integer  
+3) If s&lt;t then N(s)≤N(t)  
+4) If s&lt;t then N(t)-N(s) is the number of events that have occurred in
+the interval (s,t].
+
+**Definition**
+
+Let {N(t);t≥0} be a counting process. Then  
+  
+a) {N(t);t≥0} is said to have *independent increments* if the number of
+events that occur in disjoint intervals are independent.  
+  
+b) {N(t);t≥0} is said to have *stationary increments* if the
+distribution of the number of events that occur in any interval of time
+depend only on the length of the interval.
+
+#### **Example** 
+
+The process of our ATM machine probably has independent
+increments but not stationary increments. Why?
+
+The most important example of a counting process is the Poisson process.
+To define it we need the following notation, called
+
+**Landau's o symbol:**
+
+a function f is said to be o(h) if lim~h→0~f(h)/h = 0
+
+#### **Example** f(x)=x^2^ is o(h) but f(x)=x is not.
+
+**Lemma**
+
+o(h) ± k\*o(h) = o(h)
+
+**Definition**
+
+A counting process {N(t);t≥0} is said to be a Poisson process with rate
+λ&gt;0 if  
+  
+1) N(0)=0  
+2) N(t) has stationary and independent increments  
+3) P(N(h)=1) = λh + o(h)  
+4) P(N(h)≥2) = o(h)
+
+Notice that this implies that during a short time period the probability
+of an event occurring is proportional to the length of the interval and
+the probability of a second (or even more) events occurring is very
+small.
+
+#### **Example** 
+
+A machine is producing small electronic parts, about 100 per
+hour. On average 1 in 30 is defective. Let X(t) be the number of
+defective parts produced up to time t.
+
+Let's assume that just having produced a good (or bad) part does not
+change the probability of the next part being good (or bad). Moreover
+the rate of bad parts (1 in 30) stays the same over time. Then X(t) is a
+Poisson process.
+
+**Proposition**
+
+Let {N(t);t≥0} be a Poisson process with rate λ, then  
+N(t+s)-N(s) ~ Pois(λt)
+
+**Proof** Let p~n~ = P(N(t)=n). Then  
+![](graphs/pois1.png)  
+where the last equation follows from
+
+(P(N(h)=0) = 1-P(N(h)≥1) = 1-P(N(h)=1) - P(N(h)≥2)  
+  
+Now  
+![](graphs/pois2.png)
+
+for the case p~n~(t) we will use proof by induction: Assume  
+![](graphs/pois2a.png)
+
+**Remark** 
+
+It is intuitively clear why the definition above should lead
+to the Poisson distribution. Take the interval (0,t] and subdivide it
+into k equal size intervals (0,t/k], (t.k, 2t/k) .. ((k-1)t/k,t]. The
+probability of 2 or more events in any one interval goes to 0 as k goes
+to ∞ because
+
+  
+P(2 or more events in any subinterval)  
+  
+≤ ∑P(2 or more events in the k^th^ subinterval) (by Boole's
+inequality)  
+  
+= k\*o(t/k)
+
+= t×o(t/k)/(t/k) → 0 as k →∞  
+  
+Hence N(t) will (with probability going to 1) just equal the number of
+subintervals in which an event occurs. However, by independent and
+stationary increments this number will have a binomial distribution with
+parameters k and p=λt+o(t/k). hence by the Poisson approximation to the
+Binomial we see that N(t) will have a Poisson distribution with rate λt.
+
+#### **Example**
+
+A machine is producing small electronic parts, about 100 per
+hour. On average 1 in 30 is defective. Let X(t) be the number of
+defective parts produced up to time t.
+
+What is the probability that no defective part is produced between 10am
+and 11:30am?
+
+First the time is irrelevant, only the fact that we are looking at a 1.5
+hour time period (stationary increments)
+
+Now 100\*1/30 = 10/3 = λ, so X(t)~Pois(10/3t), so
+X(1.5)~Pois(10/3\*1.5)=Pois(5)
+
+P(X(1.5)=0) = 5^0^/0!\*exp(-5) = 0.0067
+
+Say each defective part costs the company $3.25. What is the expected
+cost per day if the machine run 16 hours (two 8 hour shifts)?
+
+X(16)~Pois(10/3\*16)=Pois(53.3)
+
+EX(16)\*3.25 = 53.3\*3.25 = $173.33
+
+------------------------------------------------------------------------
+
+### Interarrival and Waiting Times
+
+**Definition**
+
+Let T~1~ be the time when the first event occurs, T~2~
+the time from the first event until the second event etc. The sequence
+T~1~, T~2~, .. is called the sequence of
+**interarrival times**.
+
+**Proposition**
+
+Let {N(t);t≥0} be a Poisson process, and {T~i~;i≥1} be the
+interarrival times. Then T~1~, T~2~, .. are iid Exp(λ)
+
+**Proof** Note that {T~1~&gt;t} is equivalent to {no events
+occurred in (0,t]} and so  
+![](graphs/pois3.png)  
+and we see that T~1~ ~ Exp(λ). But  
+![](graphs/pois4.png)  
+because of independent and stationary increments. So we find that
+T~2~ ~ Exp(λ) and that T~1~ $\perp$
+T~2~. By induction it is clear that the sequence
+{T~n~,n=1,2,..} is an iid sequence of exponential r.v. with
+rate λ.
+
+**Remark** 
+
+This result should not come as a surprise because the
+assumption of independent and stationary increments means that the
+process from any moment on is independent of all that occurred before and
+also has the same distribution as the process started at 0. In other
+words the process is memoryless, and we have previously shown that any
+continuous rv on (0,∞) with the memoryless property has to have an
+exponential distribution.
+
+**Definition**
+
+Let S~n~ be the arrival time of the n^th^ event (This
+is also often called the waiting time until the n^th^ event).
+
+**Proposition**
+
+Let {N(t);t≥0} be a Poisson process, and {S~n~;n≥1} be the
+waiting times. Then S~n~~ Γ(n,λ)
+
+**Proof** Clearly S~n~ =
+∑^n^~i=1~T~i~, and so we find S~n~ ~
+Γ(n,λ).
+
+#### **Example** 
+
+Up to yesterday a store has 999,856 customers. They are
+planning to hold a little party when the 1,000,000^th^ customer
+comes into the store. From experience they know that a customer arrives
+about every 4 minutes, and the store is open from 9am to 6pm. What is
+the probability that they will have the party today?  
+They will have the party if at least 144 customers come into the store
+today. Let's assume that the customers arrive according to a Poisson
+process with rate 4min (?) then we want the probability
+P(S~144~ &lt; 9× 60). Now S~144~ ~Γ(144,4) and  
+P(S~144~ &lt; 540) = 0.23.  
+
+------------------------------------------------------------------------
+
+Here is another proof of the last proposition. We use the fact that the
+n^th^ event occurs at or before time t if and only if the
+number of events occurring by time t is at least n. So  
+  
+N(t)≥n ![](graphs/darrow.png) S~n~≤t  
+  
+
+This is a very useful equivalence, and much more general than just for
+the Poisson process, so here is an illustration:  
+![](graphs/pois6.png)  
+With this we find  
+![](graphs/pois5.png)
+
+so S~n~~Γ(n,λ)
+
+#### **Example** 
+
+Say that on any given day hundreds of cars pass through a
+certain intersection. Any one of them has a (hopefully small)
+probability of having an accident at that intersection. Let X(t) be the
+number of accidents in t days, then is X(t) a Poisson process?
+
+There are two problems with the assumptions of the Poisson process
+here:  
+  
+1) different days might have different numbers of cars going through
+(weekdays vs. weekends)
+
+2) probability of having an accident is probably very different for
+different cars.
+
+The first problem might be handled by considering a different
+time-scale (accidents per week?), the second problem actually is not a
+problem at all:
+
+**Theorem**: 
+
+let Z~1~, Z~2~, .. be independent
+Bernoulli rv's with P(Z~i~=1)=p~i~. Let
+S~n~=Z~1~+..+Z~n~. Then if
+λ=p~1~+..+p~n~ we have  
+![](graphs/poiss7.png)
+
+In the "classic" case where p~1~=..=p~n~=p=λ/n we
+have  
+![](graphs/poiss8.png)  
+and we see that this theorem not only gives us reason to think that the
+Poisson approximation works in the example above, it also provides a
+useful estimate of the error in the Poisson approximation to the
+Binomial.
+
+------------------------------------------------------------------------
+
+Up to now we thought of the variable t as "time". Poisson processes occur however in other situations as well:
+
+Consider events occurring along the positive axis [0,∞) as shown here  
+![](graphs/poiss9.png)  
+Examples of such processes are the time points in X-ray emissions of
+radioactive material, location of faults in lengths of cables, positions
+of skin cancer cells etc.
+
+Let N((a,b]) the number of events in the interval (a,b] That is if
+t~1~&lt;t~2~&lt;t~3~&lt;.. denote the
+locations of events, then N((a,b]) is the number of values
+t~i~ for which a&lt;t~i~≤b.
+
+Now let's make the following postulates:
+
+1) The number of events happening in disjoint intervals are independent
+
+2) For any t,h&gt;0 the distribution of N((t,t+h]) does not depend on t
+(events are equally likely anywhere on (0,∞))
+
+3) There is a positive constant λ for which P{N((t,t+h)≥1}=λh+o(h)
+
+4) There is a positive constant λ for which P{N((t,t+h)≥2}=o(h)
+
+**Theorem** 
+
+Any process satisfying 1-4 is a Poisson process  
+**proof** first note that 2) implies that N((s,t]) has the same
+distribution as N((0,t-s]), so it is enough to find the distribution of
+N((0,t]) for all t&gt;0.
+
+let's divide the interval (0,t] into n subintervals of equal length
+h=t/n, and let Z~i~=1 if there is at least one event in
+((i-1)t/n,it/n], 0 otherwise. Then
+S~n~=Z~1~+..+Z~n~ counts the total number of
+intervals that contain at least one event. Moreover by 3)
+
+p~i~ = P(Z~i~=1) = λt/n+o(t/n)
+
+Now  
+![](graphs/poiss10.png)
+
+### Conditional Distribution of Arrival Times
+
+Let W~1~ be the time of the first arrival (S~1~ from
+before). Then
+
+![](graphs/pois21a.png)
+
+and so W~1~|N(t)=1 ~U[0,t]  
+
+This result is not surprising because given that at time t there was one
+event, the time when this event actually happened could equally likely
+be in any time interval of equal length by independent and stationary
+increments.
+
+This result generalizes to N(t)=n. To do so we need the following
+
+**Definition**
+
+Say U~1~,..,U~n~~U[0,1] and indep., Let
+U~[i]~ be the i^th^ **order statistic**, the ordered
+set of values of U~1~,..,U~n~.
+
+Then it can be shown that (U~[1]~,..,U~[n]~) has
+joint density
+
+f(u~[1]~,..,u~[n]~)=n! if
+u~[1]~&lt;..&lt;u~[n]~
+
+The proof can be done using our transformation theorem for continuous
+random vectors, but the result is fairly obvious: there are n!
+permutations of n (distinct) numbers, exactly one of which is from
+smallest to largest.
+
+If V~[0,1] then U=tV~U[0,t], so f(u)=1/t
+
+so
+
+if V~1~,..,V~n~~U[0,1] and indep., and
+U~i~=tV~i~ then
+
+(U~[1]~,..,U~[n]~) has joint density
+f(u~[1]~,..,u~[n]~)=n!/t^n^ if
+u~[1]~&lt;..&lt;u~[n]~
+
+Let W~i~=U~[i]~. Now
+
+**Theorem** 
+
+let W~1~,W~2~,.. be the occurrence times in
+a Poisson process with rate λ. Then  
+![](graphs/poiss11.png)  
+In other words, conditional on the total number of arrivals the arrival
+times have the same distribution as the order statistic of a uniform.
+
+**proof**
+
+Let 0 &lt; t~1~ &lt; t~2~ &lt; .. &lt; t~n~
+&lt; t and let h be small enough so that
+t~i~+h~i~&lt;t~i+1~. Now
+
+![](graphs/pois21b.png)
+
+#### **Example**
+
+say {N(t),t≥0} is a Poisson process with rate λ. Find the
+mean time of the first event, given that N(1)=n, n≥1.  
+![](graphs/poiss21.png)
+
+#### **Example** 
+
+Customers arrive at a store according to a Poisson process
+of rate λ. Each customer pays $1 on arrival, and we want to evaluate the
+expected value of the total sum collected during (0,t] discounted back
+to time 0. If the the discount (inflation) rate is β, then this is given
+by  
+![](graphs/poiss12.png)  
+Now  
+![](graphs/poiss13.png)
+
+#### **Example** 
+
+say customers arrive at a store according to a Poisson
+process of 13 per hour. At the end of a 13hour day (8am to 9pm) 160
+customers had been in the store. What is the probability that at most 50
+of them arrive before 12noon?
+
+So we have {N(t);t≥0} is Poisson process with N(t)~Pois(t/13) (t in
+hours). We want to know
+
+P(N(4)≤50 | N(13)=160)
+
+So if 0&lt;u&lt;t and 0≤k≤n we have  
+![](graphs/poiss24.png)  
+and so N(u)|N(t)=n ~ Bin(n,u/t). Therefore
+
+P(N(4)≤50 | N(13)=160) = pbinom(50,160,4/13) = 0.59
+
+### Stopping Times
+
+#### **Example** 
+
+say {X(t);t≥0} is a Poisson process rate λ. Let T~Exp(p) and
+assume X(t) is independent of T for all  
+T. Find the density of X(T).  
+![](graphs/poiss25.png)  
+so X(T)+1~Geom(p/(λ+p)
+
+This is an example of a stochastic process sampled at a random time
+
+Note
+
+E[X(T)] = E[X(T)+1]-1 = (λ+p)/p-1 = λ/p  
+  
+or
+
+E[X(T)] = E[E{X(T)|T}] = E[λT] = λE[T] = λ/p
+
+#### **Example** 
+
+Suppose travelers arrive at a train station according to a
+Poisson process rate λ. If the train departs at time t, let us find the
+expected sum of the waiting times of all the travelers, which is  
+![](graphs/poiss26.png)
+
+#### **Example**
+
+Find E[N(t)N(t+s)]  
+![](graphs/poiss27.png)  
